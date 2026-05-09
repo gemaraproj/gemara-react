@@ -1,0 +1,82 @@
+{
+  "name": "@gemaraproj/gemara-react",
+  "version": "0.1.0",
+  "description": "Headless React renderers for Gemara artifacts.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src/generated"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./control-catalog": {
+      "types": "./dist/control-catalog/index.d.ts",
+      "import": "./dist/control-catalog/index.js",
+      "require": "./dist/control-catalog/index.cjs"
+    },
+    "./guidance-catalog": {
+      "types": "./dist/guidance-catalog/index.d.ts",
+      "import": "./dist/guidance-catalog/index.js",
+      "require": "./dist/guidance-catalog/index.cjs"
+    },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
+      "import": "./dist/primitives/index.js",
+      "require": "./dist/primitives/index.cjs"
+    },
+    "./provider": {
+      "types": "./dist/provider/index.d.ts",
+      "import": "./dist/provider/index.js",
+      "require": "./dist/provider/index.cjs"
+    },
+    "./interactive": {
+      "types": "./dist/interactive/index.d.ts",
+      "import": "./dist/interactive/index.js",
+      "require": "./dist/interactive/index.cjs"
+    },
+    "./types": {
+      "types": "./dist/generated/types.d.ts",
+      "import": "./dist/generated/types.js",
+      "require": "./dist/generated/types.cjs"
+    }
+  },
+  "scripts": {
+    "generate": "tsx scripts/generate-types.ts",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.0.1",
+    "@types/node": "^22.7.5",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "eslint": "^9.12.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "jsdom": "^25.0.1",
+    "openapi-typescript": "^7.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2",
+    "yaml": "^2.5.1"
+  }
+}

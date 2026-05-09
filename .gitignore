@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.tsbuildinfo
+*.log
+.DS_Store
+.env
+.env.local
+
+# Astro example outputs
+examples/astro/.astro/
+examples/astro/dist/
+examples/astro/node_modules/

@@ -1,0 +1,56 @@
+---
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
+import { ControlCatalog } from "@gemaraproj/gemara-react/control-catalog";
+import { GemaraProvider } from "@gemaraproj/gemara-react/provider";
+import { isControlCatalog } from "@gemaraproj/gemara-react";
+import CollapsibleControlGroup from "../components/CollapsibleControlGroup.tsx";
+
+// Load a fixture from the canonical gemara repo at build time. In a real app
+// this would come from the hub API or a content collection.
+const here = dirname(fileURLToPath(import.meta.url));
+const fixturePath = resolve(
+  here,
+  "..",
+  "..",
+  "..",
+  "..",
+  "..",
+  "gemara",
+  "test",
+  "test-data",
+  "good-ccc.yaml",
+);
+const raw = readFileSync(fixturePath, "utf8");
+const parsed = parseYaml(raw);
+if (!isControlCatalog(parsed)) {
+  throw new Error("Expected ControlCatalog at " + fixturePath);
+}
+const data = parsed;
+const firstGroupId = data.groups?.[0]?.id ?? "";
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>gemara-react Astro example</title>
+  </head>
+  <body>
+    <h1>gemara-react: ControlCatalog (server-rendered)</h1>
+    <GemaraProvider>
+      <ControlCatalog data={data} />
+    </GemaraProvider>
+
+    <hr />
+
+    <h2>Interactive island (client:idle)</h2>
+    {firstGroupId && (
+      <CollapsibleControlGroup
+        client:idle
+        data={data}
+        groupId={firstGroupId}
+      />
+    )}
+  </body>
+</html>
