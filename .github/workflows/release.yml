@@ -16,15 +16,33 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          path: gemara-react
+
+      # Tests load fixtures from ../gemara/test/test-data/. Mirror the CI build
+      # job: both repos as siblings under workspace.
+      - name: Read pinned spec version
+        id: spec
+        working-directory: gemara-react
+        run: echo "ref=$(cat .spec-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout gemara at pinned spec version
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: gemaraproj/gemara
+          ref: ${{ steps.spec.outputs.ref }}
+          path: gemara
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'
+          cache-dependency-path: gemara-react/package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
       - name: Verify tag matches package.json version
+        working-directory: gemara-react
         env:
           TAG: ${{ github.ref_name }}
         run: |
@@ -38,21 +56,27 @@ jobs:
           echo "Tag $TAG matches package.json version $pkg_version."
 
       - name: Install
+        working-directory: gemara-react
         run: npm ci
 
       - name: Lint
+        working-directory: gemara-react
         run: npm run lint
 
       - name: Typecheck
+        working-directory: gemara-react
         run: npm run typecheck
 
       - name: Test
+        working-directory: gemara-react
         run: npm test
 
       - name: Build
+        working-directory: gemara-react
         run: npm run build
 
       - name: Publish
+        working-directory: gemara-react
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance --access public

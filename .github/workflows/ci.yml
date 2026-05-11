@@ -17,32 +17,54 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          path: gemara-react
+
+      # Tests and the Astro example load fixtures from ../gemara/test/test-data/.
+      # Mirror the verify-types job's layout: both repos as siblings under workspace.
+      - name: Read pinned spec version
+        id: spec
+        working-directory: gemara-react
+        run: echo "ref=$(cat .spec-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout gemara at pinned spec version
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: gemaraproj/gemara
+          ref: ${{ steps.spec.outputs.ref }}
+          path: gemara
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'
+          cache-dependency-path: gemara-react/package-lock.json
 
       - name: Install
+        working-directory: gemara-react
         run: npm ci
 
       - name: Lint
+        working-directory: gemara-react
         run: npm run lint
 
       - name: Typecheck
+        working-directory: gemara-react
         run: npm run typecheck
 
       - name: Test
+        working-directory: gemara-react
         run: npm test
 
       - name: Build
+        working-directory: gemara-react
         run: npm run build
 
       - name: Build Astro example
         # The example depends on the library via file:../.. — so npm ci runs
         # after the library is built, otherwise the symlinked dist/ is missing.
-        working-directory: examples/astro
+        working-directory: gemara-react/examples/astro
         run: |
           npm ci
           npm run build
