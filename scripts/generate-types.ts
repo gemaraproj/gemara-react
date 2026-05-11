@@ -23,12 +23,13 @@ import { spawn } from "node:child_process";
 import { readFile, writeFile, access } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parse as parseYaml } from "yaml";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 
 // Mirrors gemara/metadata.cue #ArtifactType. Keep in sync when the spec grows.
-// Drift from the spec is caught by the runtime check at the bottom of this script.
+// Drift from the spec is enforced by assertArtifactTypeDrift() before openapi-typescript runs.
 const ARTIFACT_TYPES = [
   "CapabilityCatalog",
   "ControlCatalog",
@@ -83,6 +84,47 @@ async function resolveOpenApiSource(): Promise<string> {
       "     SPECVERSION, this script will fetch it from the GitHub release.",
     ].join("\n"),
   );
+}
+
+async function assertArtifactTypeDrift(source: string): Promise<void> {
+  const raw = await readFile(source, "utf8");
+  const doc = parseYaml(raw) as unknown;
+  const enumValues = readEnum(doc, ["components", "schemas", "ArtifactType", "enum"]);
+  if (!enumValues) {
+    throw new Error(
+      `Could not locate components.schemas.ArtifactType.enum in ${source}; ` +
+        `cannot verify drift against the hardcoded ARTIFACT_TYPES.`,
+    );
+  }
+
+  const fromSpec = new Set(enumValues);
+  const fromScript = new Set<string>(ARTIFACT_TYPES);
+  const missing = [...fromSpec].filter((v) => !fromScript.has(v)).sort();
+  const extra = [...fromScript].filter((v) => !fromSpec.has(v)).sort();
+
+  if (missing.length === 0 && extra.length === 0) return;
+
+  const lines = [
+    `ArtifactType drift detected between scripts/generate-types.ts and ${source}.`,
+  ];
+  if (missing.length > 0) {
+    lines.push(`  Missing from ARTIFACT_TYPES (present in spec): ${missing.join(", ")}`);
+  }
+  if (extra.length > 0) {
+    lines.push(`  Extra in ARTIFACT_TYPES (absent from spec): ${extra.join(", ")}`);
+  }
+  lines.push("Update ARTIFACT_TYPES in scripts/generate-types.ts to match the spec.");
+  throw new Error(lines.join("\n"));
+}
+
+function readEnum(doc: unknown, path: readonly string[]): string[] | undefined {
+  let cur: unknown = doc;
+  for (const key of path) {
+    if (typeof cur !== "object" || cur === null) return undefined;
+    cur = (cur as Record<string, unknown>)[key];
+  }
+  if (!Array.isArray(cur)) return undefined;
+  return cur.every((v) => typeof v === "string") ? (cur as string[]) : undefined;
 }
 
 function runOpenApiTypescript(source: string): Promise<string> {
@@ -210,6 +252,8 @@ export function detectArtifactType(x: unknown): ArtifactType | undefined {
 async function main() {
   const source = await resolveOpenApiSource();
   console.error(`[generate-types] source: ${source}`);
+
+  await assertArtifactTypeDrift(source);
 
   const raw = await runOpenApiTypescript(source);
 
