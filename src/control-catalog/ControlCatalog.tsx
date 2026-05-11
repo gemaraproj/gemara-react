@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { ArtifactRef } from "../primitives/ArtifactRef.js";
 import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
-import { Markdown } from "../primitives/Markdown.js";
+import { Prose } from "../primitives/Prose.js";
 import type { ControlCatalog as ControlCatalogData } from "../generated/types.js";
 
 /**
@@ -54,7 +54,7 @@ function Header({ data }: HeaderProps) {
     <header data-gemara-part="header">
       {title ? <h1 data-gemara-part="title">{title}</h1> : null}
       {metadata.description ? (
-        <Markdown content={metadata.description} as="p" />
+        <Prose content={metadata.description} as="p" />
       ) : null}
       <dl data-gemara-part="meta">
         {metadata.id ? (
@@ -155,7 +155,7 @@ function GroupView({ group, controls }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
       <h2>{group.title}</h2>
-      {group.description ? <Markdown content={group.description} as="p" /> : null}
+      {group.description ? <Prose content={group.description} as="p" /> : null}
       <ControlList controls={controls} />
     </section>
   );
@@ -205,7 +205,7 @@ function ControlView({ control }: ControlViewProps) {
       {control.objective ? (
         <section data-gemara-part="objective">
           <h4>Objective</h4>
-          <Markdown content={control.objective} as="p" />
+          <Prose content={control.objective} as="p" />
         </section>
       ) : null}
       {control["assessment-requirements"] && control["assessment-requirements"].length > 0 ? (
@@ -236,7 +236,7 @@ function RequirementList({ requirements }: RequirementListProps) {
             data-gemara-part="requirement"
             data-gemara-requirement-id={r.id ?? ""}
           >
-            <Markdown content={r.text} as="p" />
+            <Prose content={r.text} as="p" />
             {r.applicability && r.applicability.length > 0 ? (
               <p data-gemara-part="applicability">
                 Applicability: {r.applicability.join(", ")}

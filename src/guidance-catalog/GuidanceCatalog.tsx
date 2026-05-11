@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { ArtifactRef } from "../primitives/ArtifactRef.js";
 import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
-import { Markdown } from "../primitives/Markdown.js";
+import { Prose } from "../primitives/Prose.js";
 import type { GuidanceCatalog as GuidanceCatalogData } from "../generated/types.js";
 
 type Guideline = NonNullable<GuidanceCatalogData["guidelines"]>[number];
@@ -22,7 +22,7 @@ function GuidanceCatalogRoot({ data, children }: GuidanceCatalogProps) {
           <Header data={data} />
           {data["front-matter"] ? (
             <section data-gemara-part="front-matter">
-              <Markdown content={data["front-matter"]} as="div" />
+              <Prose content={data["front-matter"]} as="div" />
             </section>
           ) : null}
           <Groups data={data} />
@@ -42,7 +42,7 @@ function Header({ data }: HeaderProps) {
     <header data-gemara-part="header">
       {title ? <h1 data-gemara-part="title">{title}</h1> : null}
       {metadata.description ? (
-        <Markdown content={metadata.description} as="p" />
+        <Prose content={metadata.description} as="p" />
       ) : null}
       <dl data-gemara-part="meta">
         {metadata.id ? (
@@ -148,7 +148,7 @@ function GroupView({ group, guidelines }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
       <h2>{group.title}</h2>
-      {group.description ? <Markdown content={group.description} as="p" /> : null}
+      {group.description ? <Prose content={group.description} as="p" /> : null}
       <GuidelineList guidelines={guidelines} />
     </section>
   );
@@ -198,13 +198,13 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
       {guideline.objective ? (
         <section data-gemara-part="objective">
           <h4>Objective</h4>
-          <Markdown content={guideline.objective} as="p" />
+          <Prose content={guideline.objective} as="p" />
         </section>
       ) : null}
       {guideline.rationale?.importance ? (
         <section data-gemara-part="rationale">
           <h4>Rationale</h4>
-          <Markdown content={guideline.rationale.importance} as="p" />
+          <Prose content={guideline.rationale.importance} as="p" />
         </section>
       ) : null}
       {guideline.principles && guideline.principles.length > 0 ? (
