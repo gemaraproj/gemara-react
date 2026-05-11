@@ -23,7 +23,6 @@ import { spawn } from "node:child_process";
 import { readFile, writeFile, access } from "node:fs/promises";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse as parseYaml } from "yaml";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
@@ -87,13 +86,28 @@ async function resolveOpenApiSource(): Promise<string> {
 }
 
 async function assertArtifactTypeDrift(source: string): Promise<void> {
-  const raw = await readFile(source, "utf8");
-  const doc = parseYaml(raw) as unknown;
-  const enumValues = readEnum(doc, ["components", "schemas", "ArtifactType", "enum"]);
-  if (!enumValues) {
+  // The OpenAPI generator (gemara/cmd/gemara-docs cue2openapi) does not preserve
+  // CUE disjunction enums — ArtifactType comes out as a bare `type: string`. The
+  // CUE source is the actual source of truth, and metadata.cue sits next to the
+  // generated/ output directory.
+  const specDir = dirname(dirname(source));
+  const metadataPath = join(specDir, "metadata.cue");
+
+  let raw: string;
+  try {
+    raw = await readFile(metadataPath, "utf8");
+  } catch {
     throw new Error(
-      `Could not locate components.schemas.ArtifactType.enum in ${source}; ` +
-        `cannot verify drift against the hardcoded ARTIFACT_TYPES.`,
+      `Cannot verify ArtifactType drift: ${metadataPath} not found. ` +
+        `The spec checkout looks incomplete.`,
+    );
+  }
+
+  const enumValues = extractArtifactTypeLiterals(raw);
+  if (!enumValues || enumValues.length === 0) {
+    throw new Error(
+      `Could not extract #ArtifactType literals from ${metadataPath}. ` +
+        `The CUE format may have changed; update extractArtifactTypeLiterals().`,
     );
   }
 
@@ -105,7 +119,7 @@ async function assertArtifactTypeDrift(source: string): Promise<void> {
   if (missing.length === 0 && extra.length === 0) return;
 
   const lines = [
-    `ArtifactType drift detected between scripts/generate-types.ts and ${source}.`,
+    `ArtifactType drift detected between scripts/generate-types.ts and ${metadataPath}.`,
   ];
   if (missing.length > 0) {
     lines.push(`  Missing from ARTIFACT_TYPES (present in spec): ${missing.join(", ")}`);
@@ -117,14 +131,20 @@ async function assertArtifactTypeDrift(source: string): Promise<void> {
   throw new Error(lines.join("\n"));
 }
 
-function readEnum(doc: unknown, path: readonly string[]): string[] | undefined {
-  let cur: unknown = doc;
-  for (const key of path) {
-    if (typeof cur !== "object" || cur === null) return undefined;
-    cur = (cur as Record<string, unknown>)[key];
+function extractArtifactTypeLiterals(src: string): string[] | undefined {
+  // Match the #ArtifactType definition line. The spec currently writes the
+  // disjunction on a single line; broaden the capture if that ever changes.
+  const lineRe = /^#ArtifactType\s*:\s*(.+)$/m;
+  const m = src.match(lineRe);
+  const rhs = m?.[1];
+  if (!rhs) return undefined;
+  const stringRe = /"([^"]+)"/g;
+  const values: string[] = [];
+  for (const sm of rhs.matchAll(stringRe)) {
+    const v = sm[1];
+    if (v) values.push(v);
   }
-  if (!Array.isArray(cur)) return undefined;
-  return cur.every((v) => typeof v === "string") ? (cur as string[]) : undefined;
+  return values;
 }
 
 function runOpenApiTypescript(source: string): Promise<string> {
