@@ -1,4 +1,4 @@
-# @gemaraproj/gemara-react
+# @gemara/react
 
 Headless React renderers for [Gemara](https://github.com/gemaraproj/gemara) artifacts.
 
@@ -10,7 +10,7 @@ Headless React renderers for [Gemara](https://github.com/gemaraproj/gemara) arti
 ## Install
 
 ```bash
-npm install @gemaraproj/gemara-react
+npm install @gemara/react
 ```
 
 Requires `react >= 18`.
@@ -21,9 +21,9 @@ Requires `react >= 18`.
 ---
 import { readFileSync } from "node:fs";
 import { parse as parseYaml } from "yaml";
-import { ControlCatalog } from "@gemaraproj/gemara-react/control-catalog";
-import { GemaraProvider } from "@gemaraproj/gemara-react/provider";
-import { isControlCatalog } from "@gemaraproj/gemara-react";
+import { ControlCatalog } from "@gemara/react/control-catalog";
+import { GemaraProvider } from "@gemara/react/provider";
+import { isControlCatalog } from "@gemara/react";
 
 const raw = readFileSync("./content/my-catalog.yaml", "utf8");
 const data = parseYaml(raw);
@@ -47,13 +47,13 @@ Renderers are deliberately not in the root barrel — each lives behind its own 
 
 | Import                                         | What it gives you                                    |
 | ---------------------------------------------- | ---------------------------------------------------- |
-| `@gemaraproj/gemara-react`                     | `GemaraProvider`, primitives, type guards, types     |
-| `@gemaraproj/gemara-react/control-catalog`     | `ControlCatalog` renderer + compound parts           |
-| `@gemaraproj/gemara-react/guidance-catalog`    | `GuidanceCatalog` renderer + compound parts          |
-| `@gemaraproj/gemara-react/primitives`          | `ArtifactRef`, `EntityRef`, `DateTime`, `Prose`, `Heading`, `HeadingScope` |
-| `@gemaraproj/gemara-react/provider`            | `GemaraProvider`, `useLinkResolver`, `ArtifactReference`, `LinkResolver` |
-| `@gemaraproj/gemara-react/interactive`         | `CollapsibleGroup` (carries `"use client"`)         |
-| `@gemaraproj/gemara-react/types`               | Raw `Schemas` and discriminated artifact types       |
+| `@gemara/react`                     | `GemaraProvider`, primitives, type guards, types     |
+| `@gemara/react/control-catalog`     | `ControlCatalog` renderer + compound parts           |
+| `@gemara/react/guidance-catalog`    | `GuidanceCatalog` renderer + compound parts          |
+| `@gemara/react/primitives`          | `ArtifactRef`, `EntityRef`, `DateTime`, `Prose`, `Heading`, `HeadingScope` |
+| `@gemara/react/provider`            | `GemaraProvider`, `useLinkResolver`, `ArtifactReference`, `LinkResolver` |
+| `@gemara/react/interactive`         | `CollapsibleGroup` (carries `"use client"`)         |
+| `@gemara/react/types`               | Raw `Schemas` and discriminated artifact types       |
 
 ## Styling: the `data-gemara-*` taxonomy
 
@@ -84,7 +84,7 @@ Set `headingLevel={2}` when the host page already owns the `<h1>`.
 Cross-references (`extends`, `imports`, inline mapping entries) route through a single resolver provided via context. The default emits a plain `<a>` when a `url` is present and an inert `<span>` otherwise. Override it to plug in your router's `<Link>`, Astro's `<a>`, or anything else.
 
 ```tsx
-import { GemaraProvider } from "@gemaraproj/gemara-react/provider";
+import { GemaraProvider } from "@gemara/react/provider";
 
 <GemaraProvider
   linkResolver={(ref, children) => (
@@ -103,7 +103,7 @@ The catalog text fields (`objective`, `description`, `front-matter`, `recommenda
 
 ## React Server Components
 
-The default catalog renderers and all primitives are server-component-safe. The only interactive component (`CollapsibleGroup`) lives in `@gemaraproj/gemara-react/interactive` and carries a `"use client"` directive in its built output — RSC bundlers route it into the client graph automatically.
+The default catalog renderers and all primitives are server-component-safe. The only interactive component (`CollapsibleGroup`) lives in `@gemara/react/interactive` and carries a `"use client"` directive in its built output — RSC bundlers route it into the client graph automatically.
 
 ## Spec version
 

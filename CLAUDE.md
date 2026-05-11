@@ -6,7 +6,7 @@ This repo (`gemara-react`) is one of four sibling projects in the `gemaraproj/` 
 
 ## What this package is
 
-`@gemaraproj/gemara-react` — headless React renderers for Gemara artifacts. Server-component-clean by default: no `useState`, no `useEffect`, no `"use client"` in the default renderers. Interactive islands (e.g. `CollapsibleGroup`) live behind a separate subpath export so RSC consumers who don't reach for them never pay the client-bundle cost. Renderers emit semantic HTML with `data-gemara-*` attributes for headless styling; consumers bring their own CSS.
+`@gemara/react` — headless React renderers for Gemara artifacts. Server-component-clean by default: no `useState`, no `useEffect`, no `"use client"` in the default renderers. Interactive islands (e.g. `CollapsibleGroup`) live behind a separate subpath export so RSC consumers who don't reach for them never pay the client-bundle cost. Renderers emit semantic HTML with `data-gemara-*` attributes for headless styling; consumers bring their own CSS.
 
 Peer dep is `react >= 18`. The package targets ESM-first with a CJS fallback; `sideEffects: false` and per-renderer subpath exports enable tree-shaking per artifact.
 

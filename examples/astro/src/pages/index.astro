@@ -3,9 +3,9 @@ import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { ControlCatalog } from "@gemaraproj/gemara-react/control-catalog";
-import { GemaraProvider } from "@gemaraproj/gemara-react/provider";
-import { isControlCatalog } from "@gemaraproj/gemara-react";
+import { ControlCatalog } from "@gemara/react/control-catalog";
+import { GemaraProvider } from "@gemara/react/provider";
+import { isControlCatalog } from "@gemara/react";
 import CollapsibleControlGroup from "../components/CollapsibleControlGroup.tsx";
 
 // Load a fixture from the canonical gemara repo at build time. In a real app

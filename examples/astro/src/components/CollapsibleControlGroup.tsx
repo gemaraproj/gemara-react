@@ -1,6 +1,6 @@
-import { CollapsibleGroup } from "@gemaraproj/gemara-react/interactive";
-import { ControlCatalog } from "@gemaraproj/gemara-react/control-catalog";
-import type { ControlCatalogData } from "@gemaraproj/gemara-react";
+import { CollapsibleGroup } from "@gemara/react/interactive";
+import { ControlCatalog } from "@gemara/react/control-catalog";
+import type { ControlCatalogData } from "@gemara/react";
 
 interface Props {
   data: ControlCatalogData;
