@@ -3,6 +3,7 @@ import { ArtifactRef } from "../primitives/ArtifactRef.js";
 import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
+import { Heading, HeadingScope } from "../primitives/Heading.js";
 import type { ControlCatalog as ControlCatalogData } from "../generated/types.js";
 
 /**
@@ -28,19 +29,28 @@ type MultiEntryMapping = NonNullable<Control["guidelines"]>[number];
 
 export interface ControlCatalogProps {
   data: ControlCatalogData;
+  /**
+   * Heading level (1-6) used for the catalog title. Nested sections add fixed
+   * offsets: group = +1, control = +2, control subsection labels = +3. Defaults
+   * to 1. Set to 2 (or higher) when composing into a host page that already
+   * owns the `<h1>`.
+   */
+  headingLevel?: number;
   children?: ReactNode;
 }
 
-function ControlCatalogRoot({ data, children }: ControlCatalogProps) {
+function ControlCatalogRoot({ data, headingLevel = 1, children }: ControlCatalogProps) {
   return (
-    <article data-gemara-artifact="ControlCatalog" data-gemara-id={data.metadata.id ?? ""}>
-      {children ?? (
-        <>
-          <Header data={data} />
-          <Groups data={data} />
-        </>
-      )}
-    </article>
+    <HeadingScope level={headingLevel}>
+      <article data-gemara-artifact="ControlCatalog" data-gemara-id={data.metadata.id ?? ""}>
+        {children ?? (
+          <>
+            <Header data={data} />
+            <Groups data={data} />
+          </>
+        )}
+      </article>
+    </HeadingScope>
   );
 }
 
@@ -52,7 +62,11 @@ function Header({ data }: HeaderProps) {
   const { metadata, title } = data;
   return (
     <header data-gemara-part="header">
-      {title ? <h1 data-gemara-part="title">{title}</h1> : null}
+      {title ? (
+        <Heading offset={0} data-gemara-part="title">
+          {title}
+        </Heading>
+      ) : null}
       {metadata.description ? (
         <Prose content={metadata.description} as="p" />
       ) : null}
@@ -154,7 +168,7 @@ interface GroupViewProps {
 function GroupView({ group, controls }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
-      <h2>{group.title}</h2>
+      <Heading offset={1}>{group.title}</Heading>
       {group.description ? <Prose content={group.description} as="p" /> : null}
       <ControlList controls={controls} />
     </section>
@@ -192,7 +206,7 @@ function ControlView({ control }: ControlViewProps) {
       id={control.id ? `control-${control.id}` : undefined}
     >
       <header>
-        <h3>
+        <Heading offset={2}>
           <span data-gemara-part="control-id">{control.id}</span>
           {control.title ? (
             <>
@@ -200,11 +214,11 @@ function ControlView({ control }: ControlViewProps) {
               <span data-gemara-part="control-title">{control.title}</span>
             </>
           ) : null}
-        </h3>
+        </Heading>
       </header>
       {control.objective ? (
         <section data-gemara-part="objective">
-          <h4>Objective</h4>
+          <Heading offset={3}>Objective</Heading>
           <Prose content={control.objective} as="p" />
         </section>
       ) : null}
@@ -228,7 +242,7 @@ interface RequirementListProps {
 function RequirementList({ requirements }: RequirementListProps) {
   return (
     <section data-gemara-part="requirements">
-      <h4>Assessment requirements</h4>
+      <Heading offset={3}>Assessment requirements</Heading>
       <ol>
         {requirements.map((r) => (
           <li
@@ -257,7 +271,7 @@ interface MappingsProps {
 function Mappings({ label, mappings }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
-      <h4>{label}</h4>
+      <Heading offset={3}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
           <li key={`${m["reference-id"] ?? "ref"}-${i}`}>

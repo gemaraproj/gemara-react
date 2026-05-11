@@ -3,6 +3,7 @@ import { ArtifactRef } from "../primitives/ArtifactRef.js";
 import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
+import { Heading, HeadingScope } from "../primitives/Heading.js";
 import type { GuidanceCatalog as GuidanceCatalogData } from "../generated/types.js";
 
 type Guideline = NonNullable<GuidanceCatalogData["guidelines"]>[number];
@@ -11,24 +12,33 @@ type MultiEntryMapping = NonNullable<Guideline["principles"]>[number];
 
 export interface GuidanceCatalogProps {
   data: GuidanceCatalogData;
+  /**
+   * Heading level (1-6) used for the catalog title. Nested sections add fixed
+   * offsets: group = +1, guideline = +2, guideline subsection labels = +3.
+   * Defaults to 1. Set to 2 (or higher) when composing into a host page that
+   * already owns the `<h1>`.
+   */
+  headingLevel?: number;
   children?: ReactNode;
 }
 
-function GuidanceCatalogRoot({ data, children }: GuidanceCatalogProps) {
+function GuidanceCatalogRoot({ data, headingLevel = 1, children }: GuidanceCatalogProps) {
   return (
-    <article data-gemara-artifact="GuidanceCatalog" data-gemara-id={data.metadata.id ?? ""}>
-      {children ?? (
-        <>
-          <Header data={data} />
-          {data["front-matter"] ? (
-            <section data-gemara-part="front-matter">
-              <Prose content={data["front-matter"]} as="div" />
-            </section>
-          ) : null}
-          <Groups data={data} />
-        </>
-      )}
-    </article>
+    <HeadingScope level={headingLevel}>
+      <article data-gemara-artifact="GuidanceCatalog" data-gemara-id={data.metadata.id ?? ""}>
+        {children ?? (
+          <>
+            <Header data={data} />
+            {data["front-matter"] ? (
+              <section data-gemara-part="front-matter">
+                <Prose content={data["front-matter"]} as="div" />
+              </section>
+            ) : null}
+            <Groups data={data} />
+          </>
+        )}
+      </article>
+    </HeadingScope>
   );
 }
 
@@ -40,7 +50,11 @@ function Header({ data }: HeaderProps) {
   const { metadata, title, type } = data;
   return (
     <header data-gemara-part="header">
-      {title ? <h1 data-gemara-part="title">{title}</h1> : null}
+      {title ? (
+        <Heading offset={0} data-gemara-part="title">
+          {title}
+        </Heading>
+      ) : null}
       {metadata.description ? (
         <Prose content={metadata.description} as="p" />
       ) : null}
@@ -147,7 +161,7 @@ interface GroupViewProps {
 function GroupView({ group, guidelines }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
-      <h2>{group.title}</h2>
+      <Heading offset={1}>{group.title}</Heading>
       {group.description ? <Prose content={group.description} as="p" /> : null}
       <GuidelineList guidelines={guidelines} />
     </section>
@@ -185,7 +199,7 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
       id={guideline.id ? `guideline-${guideline.id}` : undefined}
     >
       <header>
-        <h3>
+        <Heading offset={2}>
           <span data-gemara-part="guideline-id">{guideline.id}</span>
           {guideline.title ? (
             <>
@@ -193,17 +207,17 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
               <span data-gemara-part="guideline-title">{guideline.title}</span>
             </>
           ) : null}
-        </h3>
+        </Heading>
       </header>
       {guideline.objective ? (
         <section data-gemara-part="objective">
-          <h4>Objective</h4>
+          <Heading offset={3}>Objective</Heading>
           <Prose content={guideline.objective} as="p" />
         </section>
       ) : null}
       {guideline.rationale?.importance ? (
         <section data-gemara-part="rationale">
-          <h4>Rationale</h4>
+          <Heading offset={3}>Rationale</Heading>
           <Prose content={guideline.rationale.importance} as="p" />
         </section>
       ) : null}
@@ -235,7 +249,7 @@ interface MappingsProps {
 function Mappings({ label, mappings }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
-      <h4>{label}</h4>
+      <Heading offset={3}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
           <li key={`${m["reference-id"] ?? "ref"}-${i}`}>

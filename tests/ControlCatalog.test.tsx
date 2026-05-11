@@ -92,4 +92,28 @@ describe("ControlCatalog", () => {
     expect(container.querySelector("[data-gemara-part='header']")).not.toBeNull();
     expect(container.querySelector("[data-gemara-part='groups']")).toBeNull();
   });
+
+  it("defaults the catalog title to <h1>", () => {
+    const { container } = render(<ControlCatalog data={data} />);
+    expect(container.querySelector("h1[data-gemara-part='title']")).not.toBeNull();
+  });
+
+  it("offsets all headings when headingLevel is set", () => {
+    const { container } = render(<ControlCatalog data={data} headingLevel={3} />);
+    expect(container.querySelector("h3[data-gemara-part='title']")).not.toBeNull();
+    // group +1 -> h4, control +2 -> h5, subsections +3 -> h6
+    if ((data.groups ?? []).length > 0) {
+      expect(container.querySelector("h4")).not.toBeNull();
+    }
+    if ((data.controls ?? []).length > 0) {
+      expect(container.querySelector("h5")).not.toBeNull();
+    }
+  });
+
+  it("clamps heading level at h6", () => {
+    const { container } = render(<ControlCatalog data={data} headingLevel={5} />);
+    // Title at h5, group +1 = h6, control +2 would be h7 -> clamped to h6.
+    expect(container.querySelectorAll("h6").length).toBeGreaterThan(0);
+    expect(container.querySelector("h7")).toBeNull();
+  });
 });

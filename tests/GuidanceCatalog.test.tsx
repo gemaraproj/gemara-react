@@ -56,4 +56,14 @@ describe("GuidanceCatalog", () => {
       ).not.toBeNull();
     }
   });
+
+  it("defaults the catalog title to <h1>", () => {
+    const { container } = render(<GuidanceCatalog data={data} />);
+    expect(container.querySelector("h1[data-gemara-part='title']")).not.toBeNull();
+  });
+
+  it("offsets all headings when headingLevel is set", () => {
+    const { container } = render(<GuidanceCatalog data={data} headingLevel={2} />);
+    expect(container.querySelector("h2[data-gemara-part='title']")).not.toBeNull();
+  });
 });
