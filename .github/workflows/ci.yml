@@ -19,8 +19,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node
-        # TODO: pin to a full SHA once a setup-node release is selected.
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'
@@ -81,8 +80,7 @@ jobs:
           go-version: stable
 
       - name: Setup Node
-        # TODO: pin to a full SHA.
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
           cache: 'npm'

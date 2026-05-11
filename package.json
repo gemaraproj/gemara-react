@@ -3,11 +3,36 @@
   "version": "0.1.0",
   "description": "Headless React renderers for Gemara artifacts.",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gemaraproj/gemara-react.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gemaraproj/gemara-react/issues"
+  },
+  "homepage": "https://github.com/gemaraproj/gemara-react#readme",
+  "keywords": [
+    "gemara",
+    "grc",
+    "compliance",
+    "react",
+    "headless",
+    "rsc"
+  ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "type": "module",
   "sideEffects": false,
   "files": [
     "dist",
-    "src/generated"
+    "src/generated",
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
