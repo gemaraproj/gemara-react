@@ -1,0 +1,146 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        # TODO: pin to a full SHA once a setup-node release is selected.
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Build Astro example
+        # The example depends on the library via file:../.. — so npm ci runs
+        # after the library is built, otherwise the symlinked dist/ is missing.
+        working-directory: examples/astro
+        run: |
+          npm ci
+          npm run build
+
+  verify-types:
+    name: Generated types match the spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          path: gemara-react
+
+      - name: Read pinned spec version
+        id: spec
+        working-directory: gemara-react
+        run: echo "ref=$(cat .spec-version)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout gemara at pinned spec version
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: gemaraproj/gemara
+          ref: ${{ steps.spec.outputs.ref }}
+          path: gemara
+          persist-credentials: false
+
+      - name: Setup Cue
+        uses: cue-lang/setup-cue@a93fa358375740cd8b0078f76355512b9208acb1 # v1.0.1
+        with:
+          version: "v0.15.1"
+
+      - name: Setup Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417
+        with:
+          go-version: stable
+
+      - name: Setup Node
+        # TODO: pin to a full SHA.
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: gemara-react/package-lock.json
+
+      - name: Generate OpenAPI in gemara
+        working-directory: gemara
+        run: make genopenapi
+
+      - name: Install gemara-react deps
+        working-directory: gemara-react
+        run: npm ci
+
+      - name: Regenerate TypeScript types
+        working-directory: gemara-react
+        env:
+          GEMARA_SPEC_DIR: ${{ github.workspace }}/gemara
+        run: npm run generate
+
+      - name: Fail on drift
+        working-directory: gemara-react
+        run: |
+          if ! git diff --exit-code -- src/generated/types.ts; then
+            echo "::error::src/generated/types.ts is out of date for spec $(cat .spec-version)."
+            echo "::error::Run \`GEMARA_SPEC_DIR=/path/to/gemara npm run generate\` locally and commit the result."
+            exit 1
+          fi
+
+  dco:
+    name: DCO sign-off
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify Signed-off-by on every PR commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          missing=0
+          for sha in $(git rev-list "$BASE..$HEAD"); do
+            author="$(git log -1 --format='%an <%ae>' "$sha")"
+            signoff="$(git log -1 --format=%B "$sha" | grep -i '^Signed-off-by:' || true)"
+            if [ -z "$signoff" ]; then
+              echo "::error::Commit $sha is missing Signed-off-by ($author)"
+              missing=1
+            elif ! echo "$signoff" | grep -qiF "$author"; then
+              echo "::error::Commit $sha Signed-off-by does not match author $author:"
+              echo "  $signoff"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Add 'Signed-off-by: Name <email>' or use 'git commit -s'."
+            exit 1
+          fi
+          echo "All commits have valid DCO sign-off."
