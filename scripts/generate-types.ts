@@ -242,6 +242,58 @@ export type GuidanceCatalog = Omit<Schemas["GuidanceCatalog"], "metadata" | "gui
   >;
 };
 
+/**
+ * A loaded PrincipleCatalog with the discriminator narrowed to the literal.
+ *
+ * As with the other catalog types, the OpenAPI generator drops the embedded
+ * \`#Catalog\` mixin fields (groups, title), so we restore them here. Principles
+ * carry no mappings, so the entry shape needs no further narrowing.
+ */
+export type PrincipleCatalog = Omit<Schemas["PrincipleCatalog"], "metadata"> & {
+  metadata: Schemas["Metadata"] & { type: "PrincipleCatalog" };
+  groups?: Schemas["Group"][];
+  title?: string;
+};
+
+/** A loaded VectorCatalog with the discriminator narrowed to the literal. */
+export type VectorCatalog = Omit<Schemas["VectorCatalog"], "metadata"> & {
+  metadata: Schemas["Metadata"] & { type: "VectorCatalog" };
+  groups?: Schemas["Group"][];
+  title?: string;
+};
+
+/** A loaded CapabilityCatalog with the discriminator narrowed to the literal. */
+export type CapabilityCatalog = Omit<Schemas["CapabilityCatalog"], "metadata"> & {
+  metadata: Schemas["Metadata"] & { type: "CapabilityCatalog" };
+  groups?: Schemas["Group"][];
+  title?: string;
+};
+
+/**
+ * A loaded ThreatCatalog with the discriminator narrowed to the literal.
+ *
+ * Threats carry \`capabilities\` and \`vectors\` mappings (same MultiEntryMapping
+ * restoration as Control/Guidance) and \`actors\`, whose embedded \`#Entity\` shape
+ * (id/name/type) the OpenAPI generator collapses to just \`contact\` — restore the
+ * Entity fields so EntityRef can render them.
+ */
+export type ThreatCatalog = Omit<Schemas["ThreatCatalog"], "metadata" | "threats"> & {
+  metadata: Schemas["Metadata"] & { type: "ThreatCatalog" };
+  groups?: Schemas["Group"][];
+  title?: string;
+  threats?: Array<
+    Omit<
+      NonNullable<Schemas["ThreatCatalog"]["threats"]>[number],
+      "capabilities" | "vectors" | "actors"
+    > & {
+      // capabilities is required in the spec (#Threat); vectors/actors are optional.
+      capabilities: MultiEntryMapping[];
+      vectors?: MultiEntryMapping[];
+      actors?: Array<Schemas["Entity"] & { contact?: Schemas["Contact"] }>;
+    }
+  >;
+};
+
 /** Minimal shape we rely on for type discrimination at runtime. */
 type WithDiscriminator = { metadata?: { type?: string } };
 
@@ -258,6 +310,22 @@ export function isControlCatalog(x: unknown): x is ControlCatalog {
 
 export function isGuidanceCatalog(x: unknown): x is GuidanceCatalog {
   return discriminator(x) === "GuidanceCatalog";
+}
+
+export function isPrincipleCatalog(x: unknown): x is PrincipleCatalog {
+  return discriminator(x) === "PrincipleCatalog";
+}
+
+export function isVectorCatalog(x: unknown): x is VectorCatalog {
+  return discriminator(x) === "VectorCatalog";
+}
+
+export function isCapabilityCatalog(x: unknown): x is CapabilityCatalog {
+  return discriminator(x) === "CapabilityCatalog";
+}
+
+export function isThreatCatalog(x: unknown): x is ThreatCatalog {
+  return discriminator(x) === "ThreatCatalog";
 }
 
 export function detectArtifactType(x: unknown): ArtifactType | undefined {

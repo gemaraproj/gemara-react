@@ -4,36 +4,46 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
-import type { GuidanceCatalog as GuidanceCatalogData } from "../generated/types.js";
+import type { ThreatCatalog as ThreatCatalogData } from "../generated/types.js";
 
-type Guideline = NonNullable<GuidanceCatalogData["guidelines"]>[number];
-type Group = NonNullable<GuidanceCatalogData["groups"]>[number];
-type MultiEntryMapping = NonNullable<Guideline["principles"]>[number];
+/**
+ * Headless ThreatCatalog renderer (Gemara Layer 2).
+ *
+ * Server-component-clean: no useState, no useEffect, no "use client". Compound
+ * pattern via Object.assign so consumers can either:
+ *   <ThreatCatalog data={catalog} />            // default composition
+ *   <ThreatCatalog data={catalog}>              // DIY composition
+ *     <ThreatCatalog.Header data={catalog} />
+ *     <ThreatCatalog.Groups data={catalog} />
+ *   </ThreatCatalog>
+ *
+ * Children, if provided, take over rendering entirely.
+ */
 
-export interface GuidanceCatalogProps {
-  data: GuidanceCatalogData;
+type Threat = NonNullable<ThreatCatalogData["threats"]>[number];
+type Group = NonNullable<ThreatCatalogData["groups"]>[number];
+type Actor = NonNullable<Threat["actors"]>[number];
+type MultiEntryMapping = NonNullable<Threat["capabilities"]>[number];
+
+export interface ThreatCatalogProps {
+  data: ThreatCatalogData;
   /**
    * Heading level (1-6) used for the catalog title. Nested sections add fixed
-   * offsets: group = +1, guideline = +2, guideline subsection labels = +3.
-   * Defaults to 1. Set to 2 (or higher) when composing into a host page that
-   * already owns the `<h1>`.
+   * offsets: group = +1, threat = +2, threat subsection labels = +3. Defaults
+   * to 1. Set to 2 (or higher) when composing into a host page that already
+   * owns the `<h1>`.
    */
   headingLevel?: number;
   children?: ReactNode;
 }
 
-function GuidanceCatalogRoot({ data, headingLevel = 1, children }: GuidanceCatalogProps) {
+function ThreatCatalogRoot({ data, headingLevel = 1, children }: ThreatCatalogProps) {
   return (
     <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="GuidanceCatalog" data-gemara-id={data.metadata.id ?? ""}>
+      <article data-gemara-artifact="ThreatCatalog" data-gemara-id={data.metadata.id ?? ""}>
         {children ?? (
           <>
             <Header data={data} />
-            {data["front-matter"] ? (
-              <section data-gemara-part="front-matter">
-                <Prose content={data["front-matter"]} as="div" />
-              </section>
-            ) : null}
             <Groups data={data} />
           </>
         )}
@@ -43,11 +53,11 @@ function GuidanceCatalogRoot({ data, headingLevel = 1, children }: GuidanceCatal
 }
 
 interface HeaderProps {
-  data: GuidanceCatalogData;
+  data: ThreatCatalogData;
 }
 
 function Header({ data }: HeaderProps) {
-  const { metadata, title, type } = data;
+  const { metadata, title } = data;
   return (
     <header data-gemara-part="header">
       {title ? (
@@ -63,12 +73,6 @@ function Header({ data }: HeaderProps) {
           <>
             <dt>ID</dt>
             <dd>{metadata.id}</dd>
-          </>
-        ) : null}
-        {type ? (
-          <>
-            <dt>Type</dt>
-            <dd>{type}</dd>
           </>
         ) : null}
         {metadata.version ? (
@@ -105,48 +109,45 @@ function Header({ data }: HeaderProps) {
 }
 
 interface GroupsProps {
-  data: GuidanceCatalogData;
+  data: ThreatCatalogData;
 }
 
 function Groups({ data }: GroupsProps) {
   const groups = data.groups ?? [];
-  const guidelines = data.guidelines ?? [];
+  const threats = data.threats ?? [];
 
   if (groups.length === 0) {
     return (
       <section data-gemara-part="groups">
-        <GuidelineList guidelines={guidelines} />
+        <ThreatList threats={threats} />
       </section>
     );
   }
 
-  const buckets = new Map<string, Guideline[]>();
+  // Pre-bucket threats by group id; threats with no group fall into "ungrouped".
+  const buckets = new Map<string, Threat[]>();
   for (const g of groups) buckets.set(g.id ?? "", []);
-  const ungrouped: Guideline[] = [];
-  for (const g of guidelines) {
-    const gid = g.group ?? "";
+  const ungrouped: Threat[] = [];
+  for (const t of threats) {
+    const gid = t.group ?? "";
     const bucket = buckets.get(gid);
-    if (bucket) bucket.push(g);
-    else ungrouped.push(g);
+    if (bucket) bucket.push(t);
+    else ungrouped.push(t);
   }
 
   return (
     <section data-gemara-part="groups">
       {groups.map((g) => (
-        <GroupView
-          key={g.id}
-          group={g}
-          guidelines={buckets.get(g.id ?? "") ?? []}
-        />
+        <GroupView key={g.id} group={g} threats={buckets.get(g.id ?? "") ?? []} />
       ))}
       {ungrouped.length > 0 ? (
         <GroupView
           group={{
             id: "_ungrouped",
             title: "Ungrouped",
-            description: "Guidelines not assigned to a declared group.",
+            description: "Threats not assigned to a declared group.",
           }}
-          guidelines={ungrouped}
+          threats={ungrouped}
         />
       ) : null}
     </section>
@@ -155,89 +156,94 @@ function Groups({ data }: GroupsProps) {
 
 interface GroupViewProps {
   group: Group;
-  guidelines: Guideline[];
+  threats: Threat[];
 }
 
-function GroupView({ group, guidelines }: GroupViewProps) {
+function GroupView({ group, threats }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
       <Heading offset={1}>{group.title}</Heading>
       {group.description ? <Prose content={group.description} as="p" /> : null}
-      <GuidelineList guidelines={guidelines} />
+      <ThreatList threats={threats} />
     </section>
   );
 }
 
-interface GuidelineListProps {
-  guidelines: Guideline[];
+interface ThreatListProps {
+  threats: Threat[];
 }
 
-function GuidelineList({ guidelines }: GuidelineListProps) {
-  if (guidelines.length === 0) {
-    return <p data-gemara-empty="guidelines">No guidelines in this group.</p>;
+function ThreatList({ threats }: ThreatListProps) {
+  if (threats.length === 0) {
+    return <p data-gemara-empty="threats">No threats in this group.</p>;
   }
   return (
-    <ol data-gemara-part="guideline-list">
-      {guidelines.map((g) => (
-        <li key={g.id}>
-          <GuidelineView guideline={g} />
+    <ol data-gemara-part="threat-list">
+      {threats.map((t) => (
+        <li key={t.id}>
+          <ThreatView threat={t} />
         </li>
       ))}
     </ol>
   );
 }
 
-interface GuidelineViewProps {
-  guideline: Guideline;
+interface ThreatViewProps {
+  threat: Threat;
 }
 
-function GuidelineView({ guideline }: GuidelineViewProps) {
+function ThreatView({ threat }: ThreatViewProps) {
   return (
     <article
-      data-gemara-part="guideline"
-      data-gemara-guideline-id={guideline.id ?? ""}
-      id={guideline.id ? `guideline-${guideline.id}` : undefined}
+      data-gemara-part="threat"
+      data-gemara-threat-id={threat.id ?? ""}
+      id={threat.id ? `threat-${threat.id}` : undefined}
     >
       <header>
         <Heading offset={2}>
-          <span data-gemara-part="guideline-id">{guideline.id}</span>
-          {guideline.title ? (
+          <span data-gemara-part="threat-id">{threat.id}</span>
+          {threat.title ? (
             <>
               {" "}
-              <span data-gemara-part="guideline-title">{guideline.title}</span>
+              <span data-gemara-part="threat-title">{threat.title}</span>
             </>
           ) : null}
         </Heading>
       </header>
-      {guideline.objective ? (
-        <section data-gemara-part="objective">
-          <Heading offset={3}>Objective</Heading>
-          <Prose content={guideline.objective} as="p" />
+      {threat.description ? (
+        <section data-gemara-part="description">
+          <Prose content={threat.description} as="p" />
         </section>
       ) : null}
-      {guideline.rationale?.importance ? (
-        <section data-gemara-part="rationale">
-          <Heading offset={3}>Rationale</Heading>
-          <Prose content={guideline.rationale.importance} as="p" />
-        </section>
+      {threat.actors && threat.actors.length > 0 ? (
+        <Actors actors={threat.actors} />
       ) : null}
-      {guideline.principles && guideline.principles.length > 0 ? (
-        <Mappings label="Principles" mappings={guideline.principles} />
+      {threat.capabilities && threat.capabilities.length > 0 ? (
+        <Mappings label="Capabilities" mappings={threat.capabilities} />
       ) : null}
-      {guideline.extends ? (
-        <p data-gemara-part="extends">
-          Extends:{" "}
-          <ArtifactRef
-            kind="entry"
-            id={guideline.extends["entry-id"] ?? ""}
-            referenceId={guideline.extends["reference-id"]}
-            relation="extends"
-          >
-            {guideline.extends["entry-id"]}
-          </ArtifactRef>
-        </p>
+      {threat.vectors && threat.vectors.length > 0 ? (
+        <Mappings label="Vectors" mappings={threat.vectors} />
       ) : null}
     </article>
+  );
+}
+
+interface ActorsProps {
+  actors: Actor[];
+}
+
+function Actors({ actors }: ActorsProps) {
+  return (
+    <section data-gemara-part="actors">
+      <Heading offset={3}>Actors</Heading>
+      <ul>
+        {actors.map((a, i) => (
+          <li key={a.id ?? `actor-${i}`} data-gemara-part="actor">
+            <EntityRef entity={a} />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -284,10 +290,15 @@ function Mappings({ label, mappings }: MappingsProps) {
   );
 }
 
-export const GuidanceCatalog = Object.assign(GuidanceCatalogRoot, {
+/**
+ * Compound API. Object.assign keeps the default top-level renderer callable
+ * as `<ThreatCatalog>` while still exposing parts at `<ThreatCatalog.X>`.
+ */
+export const ThreatCatalog = Object.assign(ThreatCatalogRoot, {
   Header,
   Groups,
   Group: GroupView,
-  Guideline: GuidelineView,
+  Threat: ThreatView,
+  Actors,
   Mappings,
 });

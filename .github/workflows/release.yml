@@ -39,7 +39,6 @@ jobs:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: gemara-react/package-lock.json
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Verify tag matches package.json version
         working-directory: gemara-react
@@ -75,8 +74,9 @@ jobs:
         working-directory: gemara-react
         run: npm run build
 
+      - name: Upgrade npm for Trusted Publishing
+        run: npm install -g npm@latest
+
       - name: Publish
         working-directory: gemara-react
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance --access public

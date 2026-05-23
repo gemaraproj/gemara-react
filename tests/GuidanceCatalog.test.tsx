@@ -57,6 +57,28 @@ describe("GuidanceCatalog", () => {
     }
   });
 
+  it("renders inner principle mapping entries with their reference ids", () => {
+    // Regression guard: inner MultiEntryMapping entries carry reference-id (not
+    // entry-id). Assert the real ids reach the resolver output, not blank labels.
+    const { container } = render(<GuidanceCatalog data={data} />);
+    const refIds = new Set<string>();
+    for (const g of data.guidelines ?? []) {
+      for (const m of g.principles ?? []) {
+        for (const e of m.entries ?? []) {
+          const id = e["entry-id"] ?? e["reference-id"];
+          if (id) refIds.add(id);
+        }
+      }
+    }
+    expect(refIds.size).toBeGreaterThan(0);
+    for (const id of refIds) {
+      expect(
+        container.querySelector(`[data-gemara-ref-id='${id}']`),
+        `expected a rendered ref for ${id}`,
+      ).not.toBeNull();
+    }
+  });
+
   it("defaults the catalog title to <h1>", () => {
     const { container } = render(<GuidanceCatalog data={data} />);
     expect(container.querySelector("h1[data-gemara-part='title']")).not.toBeNull();

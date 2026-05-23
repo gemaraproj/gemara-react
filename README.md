@@ -39,7 +39,7 @@ if (!isControlCatalog(data)) throw new Error("Not a ControlCatalog");
 </html>
 ```
 
-The library does not ship a YAML/JSON loader — consumers parse with their tool of choice. The runtime guards (`isControlCatalog`, `isGuidanceCatalog`, `detectArtifactType`) narrow the discriminated union.
+The library does not ship a YAML/JSON loader — consumers parse with their tool of choice. The runtime guards (`isControlCatalog`, `isGuidanceCatalog`, `isCapabilityCatalog`, `isPrincipleCatalog`, `isThreatCatalog`, `isVectorCatalog`, and `detectArtifactType`) narrow the discriminated union.
 
 ## Subpath imports
 
@@ -48,8 +48,12 @@ Renderers are deliberately not in the root barrel — each lives behind its own 
 | Import                                         | What it gives you                                    |
 | ---------------------------------------------- | ---------------------------------------------------- |
 | `@gemara/react`                     | `GemaraProvider`, primitives, type guards, types     |
-| `@gemara/react/control-catalog`     | `ControlCatalog` renderer + compound parts           |
-| `@gemara/react/guidance-catalog`    | `GuidanceCatalog` renderer + compound parts          |
+| `@gemara/react/control-catalog`     | `ControlCatalog` renderer + compound parts (Layer 2) |
+| `@gemara/react/guidance-catalog`    | `GuidanceCatalog` renderer + compound parts (Layer 1)|
+| `@gemara/react/capability-catalog`  | `CapabilityCatalog` renderer + compound parts (Layer 2)|
+| `@gemara/react/principle-catalog`   | `PrincipleCatalog` renderer + compound parts (Layer 1)|
+| `@gemara/react/threat-catalog`      | `ThreatCatalog` renderer + compound parts (Layer 2)  |
+| `@gemara/react/vector-catalog`      | `VectorCatalog` renderer + compound parts (Layer 1)  |
 | `@gemara/react/primitives`          | `ArtifactRef`, `EntityRef`, `DateTime`, `Prose`, `Heading`, `HeadingScope` |
 | `@gemara/react/provider`            | `GemaraProvider`, `useLinkResolver`, `ArtifactReference`, `LinkResolver` |
 | `@gemara/react/interactive`         | `CollapsibleGroup` (carries `"use client"`)         |
@@ -59,11 +63,11 @@ Renderers are deliberately not in the root barrel — each lives behind its own 
 
 The library ships no CSS. The public styling contract is the set of `data-gemara-*` attributes emitted on rendered elements.
 
-- `data-gemara-artifact="ControlCatalog" | "GuidanceCatalog"` on each renderer's root `<article>`.
+- `data-gemara-artifact="ControlCatalog" | "GuidanceCatalog" | "CapabilityCatalog" | "PrincipleCatalog" | "ThreatCatalog" | "VectorCatalog"` on each renderer's root `<article>`.
 - `data-gemara-id` — the artifact `metadata.id`.
-- `data-gemara-part="header" | "title" | "meta" | "groups" | "group" | "control" | "guideline" | "control-id" | "control-title" | "guideline-id" | "guideline-title" | "objective" | "rationale" | "requirements" | "requirement" | "applicability" | "mappings" | "control-list" | "guideline-list" | "front-matter" | "extends"` for structural slots.
-- `data-gemara-control-id`, `data-gemara-guideline-id`, `data-gemara-group-id`, `data-gemara-requirement-id` for stable selectors.
-- `data-gemara-mappings-label="guidelines" | "threats" | "principles"` on mapping sections.
+- `data-gemara-part="header" | "title" | "meta" | "groups" | "group" | "control" | "guideline" | "capability" | "principle" | "threat" | "vector" | "control-id" | "control-title" | "guideline-id" | "guideline-title" | "capability-id" | "capability-title" | "principle-id" | "principle-title" | "threat-id" | "threat-title" | "vector-id" | "vector-title" | "objective" | "rationale" | "description" | "requirements" | "requirement" | "applicability" | "actors" | "actor" | "mappings" | "control-list" | "guideline-list" | "capability-list" | "principle-list" | "threat-list" | "vector-list" | "front-matter" | "extends"` for structural slots.
+- `data-gemara-control-id`, `data-gemara-guideline-id`, `data-gemara-capability-id`, `data-gemara-principle-id`, `data-gemara-threat-id`, `data-gemara-vector-id`, `data-gemara-group-id`, `data-gemara-requirement-id` for stable selectors.
+- `data-gemara-mappings-label="guidelines" | "threats" | "principles" | "capabilities" | "vectors"` on mapping sections.
 - `data-gemara-ref="artifact" | "entry" | "mapping-reference"` + `data-gemara-ref-id` on resolver output.
 - `data-gemara-prose=""` on the `Prose` wrapper element (plain-text fields).
 
@@ -71,7 +75,7 @@ These attributes are stable across patch releases. Treat them like a CSS API.
 
 ## Composing into your page outline: `headingLevel`
 
-Both catalog renderers accept an optional `headingLevel` prop (default `1`) that sets the level of the catalog title. Nested sections add fixed offsets (group = +1, control/guideline = +2, subsections = +3) and are clamped at `<h6>`.
+Every catalog renderer accepts an optional `headingLevel` prop (default `1`) that sets the level of the catalog title. Nested sections add fixed offsets (group = +1, entry = +2, subsections = +3) and are clamped at `<h6>`.
 
 Set `headingLevel={2}` when the host page already owns the `<h1>`.
 

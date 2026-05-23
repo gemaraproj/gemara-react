@@ -278,19 +278,25 @@ function Mappings({ label, mappings }: MappingsProps) {
             <strong>{m["reference-id"]}</strong>
             {m.entries && m.entries.length > 0 ? (
               <ul>
-                {m.entries.map((e, j) => (
-                  <li key={`${e["entry-id"] ?? "entry"}-${j}`}>
-                    <ArtifactRef
-                      kind="entry"
-                      id={e["entry-id"] ?? ""}
-                      referenceId={m["reference-id"]}
-                      relation={label.toLowerCase()}
-                    >
-                      {e["entry-id"]}
-                    </ArtifactRef>
-                    {e.remarks ? <> — {e.remarks}</> : null}
-                  </li>
-                ))}
+                {m.entries.map((e, j) => {
+                  // Inner MultiEntryMapping entries are #ArtifactMapping, which
+                  // carries `reference-id`. The postamble keeps `entry-id` as a
+                  // forward-looking field; prefer it, fall back to today's shape.
+                  const entryId = e["entry-id"] ?? e["reference-id"];
+                  return (
+                    <li key={`${entryId ?? "entry"}-${j}`}>
+                      <ArtifactRef
+                        kind="entry"
+                        id={entryId ?? ""}
+                        referenceId={m["reference-id"]}
+                        relation={label.toLowerCase()}
+                      >
+                        {entryId}
+                      </ArtifactRef>
+                      {e.remarks ? <> — {e.remarks}</> : null}
+                    </li>
+                  );
+                })}
               </ul>
             ) : null}
           </li>

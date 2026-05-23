@@ -56,6 +56,28 @@ describe("ControlCatalog", () => {
     }
   });
 
+  it("renders inner mapping entries with their reference ids", () => {
+    // Regression guard: inner MultiEntryMapping entries carry reference-id (not
+    // entry-id). Assert the real ids reach the resolver output, not blank labels.
+    const { container } = render(<ControlCatalog data={data} />);
+    const refIds = new Set<string>();
+    for (const c of data.controls ?? []) {
+      for (const m of [...(c.guidelines ?? []), ...(c.threats ?? [])]) {
+        for (const e of m.entries ?? []) {
+          const id = e["entry-id"] ?? e["reference-id"];
+          if (id) refIds.add(id);
+        }
+      }
+    }
+    expect(refIds.size).toBeGreaterThan(0);
+    for (const id of refIds) {
+      expect(
+        container.querySelector(`[data-gemara-ref-id='${id}']`),
+        `expected a rendered ref for ${id}`,
+      ).not.toBeNull();
+    }
+  });
+
   it("uses linkResolver from context for cross-references", () => {
     const Resolver = ({ children }: { children: React.ReactNode }) => (
       <GemaraProvider

@@ -1,6 +1,6 @@
 {
   "name": "@gemara/react",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Headless React renderers for Gemara artifacts.",
   "license": "Apache-2.0",
   "repository": {
@@ -49,6 +49,26 @@
       "types": "./dist/guidance-catalog/index.d.ts",
       "import": "./dist/guidance-catalog/index.js",
       "require": "./dist/guidance-catalog/index.cjs"
+    },
+    "./capability-catalog": {
+      "types": "./dist/capability-catalog/index.d.ts",
+      "import": "./dist/capability-catalog/index.js",
+      "require": "./dist/capability-catalog/index.cjs"
+    },
+    "./principle-catalog": {
+      "types": "./dist/principle-catalog/index.d.ts",
+      "import": "./dist/principle-catalog/index.js",
+      "require": "./dist/principle-catalog/index.cjs"
+    },
+    "./threat-catalog": {
+      "types": "./dist/threat-catalog/index.d.ts",
+      "import": "./dist/threat-catalog/index.js",
+      "require": "./dist/threat-catalog/index.cjs"
+    },
+    "./vector-catalog": {
+      "types": "./dist/vector-catalog/index.d.ts",
+      "import": "./dist/vector-catalog/index.js",
+      "require": "./dist/vector-catalog/index.cjs"
     },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",

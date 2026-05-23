@@ -9,10 +9,18 @@ export type {
   ArtifactType,
   ControlCatalog as ControlCatalogData,
   GuidanceCatalog as GuidanceCatalogData,
+  CapabilityCatalog as CapabilityCatalogData,
+  PrincipleCatalog as PrincipleCatalogData,
+  ThreatCatalog as ThreatCatalogData,
+  VectorCatalog as VectorCatalogData,
 } from "./generated/types.js";
 export {
   ARTIFACT_TYPES,
   isControlCatalog,
   isGuidanceCatalog,
+  isCapabilityCatalog,
+  isPrincipleCatalog,
+  isThreatCatalog,
+  isVectorCatalog,
   detectArtifactType,
 } from "./generated/types.js";
