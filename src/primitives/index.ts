@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 export { ArtifactRef, type ArtifactRefProps } from "./ArtifactRef.js";
 export { EntityRef, type EntityRefProps, type EntityLike } from "./EntityRef.js";
 export { DateTime, type DateTimeProps } from "./DateTime.js";

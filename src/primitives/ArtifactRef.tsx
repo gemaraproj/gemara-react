@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import { Slot } from "@radix-ui/react-slot";
 import type { ReactNode } from "react";
 import { useLinkResolver, type ArtifactReference } from "../provider/index.js";

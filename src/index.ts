@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 // Top-level barrel — provider + primitives only.
 // Renderers live behind subpath imports so consumers tree-shake per artifact.
 export * from "./provider/index.js";

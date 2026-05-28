@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 export interface DateTimeProps {
   /** ISO 8601 datetime string, as produced by Gemara's #Datetime format. */
   value: string | undefined;
