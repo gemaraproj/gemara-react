@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 export interface ProseProps {
   content: string | undefined;
   /** Optional element override — defaults to `<div>`. */

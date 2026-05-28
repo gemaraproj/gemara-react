@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import type { ReactNode } from "react";
 import { ArtifactRef } from "../primitives/ArtifactRef.js";
 import { DateTime } from "../primitives/DateTime.js";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 import { useContext } from "react";
 import { GemaraContext, type LinkResolver } from "./GemaraProvider.js";
 
