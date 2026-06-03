@@ -56,7 +56,7 @@ Renderers are deliberately not in the root barrel — each lives behind its own 
 | `@gemara/react/vector-catalog`      | `VectorCatalog` renderer + compound parts (Layer 1)  |
 | `@gemara/react/primitives`          | `ArtifactRef`, `EntityRef`, `DateTime`, `Prose`, `Heading`, `HeadingScope` |
 | `@gemara/react/provider`            | `GemaraProvider`, `useLinkResolver`, `ArtifactReference`, `LinkResolver` |
-| `@gemara/react/interactive`         | `CollapsibleGroup` (carries `"use client"`)         |
+| `@gemara/react/interactive`         | `CollapsibleGroup`, `FormatTabs` (carry `"use client"`) |
 | `@gemara/react/types`               | Raw `Schemas` and discriminated artifact types       |
 
 ## Styling: the `data-gemara-*` taxonomy
@@ -70,6 +70,8 @@ The library ships no CSS. The public styling contract is the set of `data-gemara
 - `data-gemara-mappings-label="guidelines" | "threats" | "principles" | "capabilities" | "vectors"` on mapping sections.
 - `data-gemara-ref="artifact" | "entry" | "mapping-reference"` + `data-gemara-ref-id` on resolver output.
 - `data-gemara-prose=""` on the `Prose` wrapper element (plain-text fields).
+- `CollapsibleGroup` (interactive) emits `data-gemara-part="collapsible" | "collapsible-trigger" | "collapsible-content"`, plus `data-gemara-open=""` on the wrapper when expanded.
+- `FormatTabs` (interactive) emits `data-gemara-part="format-tabs" | "format-tablist" | "format-tab" | "format-panel" | "format-code"`, plus `data-gemara-tab-id` on tabs/panels, `data-gemara-selected=""` on the active tab, and `data-gemara-language` on each code `<pre>`.
 
 These attributes are stable across patch releases. Treat them like a CSS API.
 
@@ -105,9 +107,33 @@ The resolver receives an `ArtifactReference` (`kind: "artifact" | "entry" | "map
 
 The catalog text fields (`objective`, `description`, `front-matter`, `recommendations.text`, etc.) are rendered as plain text with `white-space: pre-wrap` so authored line breaks survive. The Gemara CUE schema does not type any of these as Markdown — that is a convention, not a contract — so the library makes no parsing promise. If a consumer needs rich formatting, swap the `Prose` primitive locally or pre-render upstream (e.g. in go-gemara) and feed pre-rendered output through your own wrapper.
 
+## Multiple formats: `FormatTabs`
+
+Gemara artifacts can be projected into other formats — `go-gemara`'s `gemaraconv` turns a Control Catalog into OSCAL and Markdown, a Guidance Catalog into an OSCAL Catalog + Profile, an Evaluation Log into SARIF. `FormatTabs` puts a styled **Preview** alongside tabs that show those raw projections as code blocks.
+
+`gemaraconv` is Go, so it can't run in the browser or an RSC render. The component does **no conversion or fetching** — your server produces the format strings (call the hub API, or run go-gemara) and passes them in, and you supply the Preview as a rendered node. That keeps the library decoupled and headless; `FormatTabs` just displays and manages tab state.
+
+```tsx
+import { FormatTabs } from "@gemara/react/interactive";
+import { ControlCatalog } from "@gemara/react/control-catalog";
+
+<FormatTabs
+  aria-label="Catalog formats"
+  tabs={[
+    { id: "preview",  label: "Preview",  preview: <ControlCatalog data={catalog} /> },
+    { id: "markdown", label: "Markdown", language: "markdown", content: markdown },
+    { id: "oscal",    label: "OSCAL",    language: "json",     content: oscalJson },
+  ]}
+/>
+```
+
+Each tab is either a `preview` node (rendered as-is) or `content` text (rendered in a `<pre><code>` with `data-gemara-language` for your highlighter — the library ships no highlighting). A tab with neither is the seam for loading/empty states: pass `preview={<Spinner />}` while a conversion is still in flight.
+
+It implements the ARIA tabs pattern with **automatic activation** — Arrow keys move focus and switch the panel in one step (Left/Right wrap; Home/End jump to first/last). Provide `aria-label` (or `aria-labelledby`) so the tablist has an accessible name — important when several viewers share a page. Because it holds tab state, it lives in `@gemara/react/interactive` and carries `"use client"`.
+
 ## React Server Components
 
-The default catalog renderers and all primitives are server-component-safe. The only interactive component (`CollapsibleGroup`) lives in `@gemara/react/interactive` and carries a `"use client"` directive in its built output — RSC bundlers route it into the client graph automatically.
+The default catalog renderers and all primitives are server-component-safe. The interactive components (`CollapsibleGroup`, `FormatTabs`) live in `@gemara/react/interactive` and carry a `"use client"` directive in their built output — RSC bundlers route them into the client graph automatically.
 
 ## Spec version
 

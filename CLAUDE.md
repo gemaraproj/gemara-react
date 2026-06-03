@@ -70,6 +70,7 @@ Renderers emit semantic HTML with `data-gemara-*` attributes and no styling. The
 - `data-gemara-mappings-label="guidelines" | "threats"` to distinguish mapping sections.
 - `data-gemara-ref="artifact" | "entry" | "mapping-reference"` + `data-gemara-ref-id` on resolver output.
 - `data-gemara-prose=""` on the wrapper element emitted by the `Prose` primitive (text fields rendered as plain text with `white-space: pre-wrap`).
+- `data-gemara-part="format-tabs" | "format-tablist" | "format-tab" | "format-panel" | "format-code"` on the `FormatTabs` interactive viewer, with `data-gemara-tab-id` on tabs/panels, `data-gemara-selected=""` on the active tab, and `data-gemara-language` on the code `<pre>`. `FormatTabs` does no conversion — the consumer supplies the Preview node and pre-converted (gemaraconv, server-side) format strings as props.
 
 Tests assert against these attributes; treat them as a stable contract and update tests in lockstep when changing them.
 
