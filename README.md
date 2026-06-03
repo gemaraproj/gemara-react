@@ -121,6 +121,7 @@ import { ControlCatalog } from "@gemara/react/control-catalog";
   aria-label="Catalog formats"
   tabs={[
     { id: "preview",  label: "Preview",  preview: <ControlCatalog data={catalog} /> },
+    { id: "yaml",     label: "YAML",     language: "yaml",     content: rawYaml },
     { id: "markdown", label: "Markdown", language: "markdown", content: markdown },
     { id: "oscal",    label: "OSCAL",    language: "json",     content: oscalJson },
   ]}
@@ -128,6 +129,14 @@ import { ControlCatalog } from "@gemara/react/control-catalog";
 ```
 
 Each tab is either a `preview` node (rendered as-is) or `content` text (rendered in a `<pre><code>` with `data-gemara-language` for your highlighter — the library ships no highlighting). A tab with neither is the seam for loading/empty states: pass `preview={<Spinner />}` while a conversion is still in flight.
+
+**`content` is rendered verbatim — formatting and tab selection are yours.** The component does no conversion, pretty-printing, or validation, so what you pass is exactly what renders:
+
+- **Pretty-print upstream.** A compact OSCAL string from the hub API (`{"catalog":{…}}`) shows as one flat line. Indent it before passing it in: `JSON.stringify(JSON.parse(oscalJson), null, 2)`. go-gemara's `oscalexport` CLI already emits indented JSON; a raw `fetch()` may not.
+- **You own which tabs exist.** There's no automatic format discovery. The raw **YAML** tab is just the source string you already parsed — no go-gemara round-trip needed (`content: rawYaml`). Only add an OSCAL or Markdown tab for artifact types that actually have a `gemaraconv` converter; for others, omit the tab.
+- **Validation lives upstream**, in go-gemara and the spec — `FormatTabs` will faithfully display malformed input. Use the empty-tab seam (`preview={<ErrorNote />}`) to surface a conversion that failed.
+
+A worked Astro example wiring all three (Preview + raw YAML + pre-converted OSCAL) lives in [`examples/astro/`](./examples/astro/src/components/MultiFormatViewer.tsx).
 
 It implements the ARIA tabs pattern with **automatic activation** — Arrow keys move focus and switch the panel in one step (Left/Right wrap; Home/End jump to first/last). Provide `aria-label` (or `aria-labelledby`) so the tablist has an accessible name — important when several viewers share a page. Because it holds tab state, it lives in `@gemara/react/interactive` and carries `"use client"`.
 
