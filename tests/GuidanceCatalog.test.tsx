@@ -80,6 +80,22 @@ describe("GuidanceCatalog", () => {
     }
   });
 
+  it("groups principle mappings in a collapsed References section", () => {
+    const { container } = render(<GuidanceCatalog data={data} />);
+    const details = container.querySelector(
+      "details[data-gemara-part='references']",
+    ) as HTMLDetailsElement | null;
+    expect(details).not.toBeNull();
+    expect(details?.open).toBe(false);
+    expect(
+      details?.querySelector("summary[data-gemara-part='references-summary']")
+        ?.textContent,
+    ).toBe("References to Other Documents");
+    expect(
+      details?.querySelector("[data-gemara-mappings-label='principles']"),
+    ).not.toBeNull();
+  });
+
   it("defaults the catalog title to <h1>", () => {
     const { container } = render(<GuidanceCatalog data={data} />);
     expect(container.querySelector("h1[data-gemara-part='title']")).not.toBeNull();

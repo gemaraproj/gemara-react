@@ -1,0 +1,358 @@
+{
+  "catalog": {
+    "groups": [
+      {
+        "class": "family",
+        "controls": [
+          {
+            "class": "data-protection",
+            "controls": [
+              {
+                "id": "CCC.C01.TR01",
+                "parts": [
+                  {
+                    "id": "CCC.C01.TR01_smt",
+                    "name": "statement",
+                    "prose": "When a port is exposed for non-SSH network traffic, all traffic MUST\ninclude a TLS handshake AND be encrypted using TLS 1.2 or higher.\n"
+                  },
+                  {
+                    "id": "CCC.C01.TR01_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C01.TR01_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C01.TR01"
+              },
+              {
+                "id": "CCC.C01.TR02",
+                "parts": [
+                  {
+                    "id": "CCC.C01.TR02_smt",
+                    "name": "statement",
+                    "prose": "When a port is exposed for SSH network traffic, all traffic MUST\ninclude a SSH handshake AND be encrypted using SSHv2 or higher.\n"
+                  },
+                  {
+                    "id": "CCC.C01.TR02_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C01.TR02_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C01.TR02"
+              }
+            ],
+            "id": "CCC.C01",
+            "links": [
+              {
+                "href": "https://example/versions/2024.1#ccc.c01",
+                "rel": "canonical"
+              }
+            ],
+            "parts": [
+              {
+                "id": "CCC.C01_smt",
+                "name": "statement",
+                "prose": "Ensure that all communications are encrypted in transit to protect data\nintegrity and confidentiality.\n"
+              }
+            ],
+            "title": "Prevent Unencrypted Requests"
+          },
+          {
+            "class": "data-protection",
+            "controls": [
+              {
+                "id": "CCC.C06.TR01",
+                "parts": [
+                  {
+                    "id": "CCC.C06.TR01_smt",
+                    "name": "statement",
+                    "prose": "When a deployment request is made, the service MUST validate\nthat the deployment region is not to a restricted or regions\nor availability zones.\n"
+                  },
+                  {
+                    "id": "CCC.C06.TR01_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C06.TR01_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C06.TR01"
+              },
+              {
+                "id": "CCC.C06.TR02",
+                "parts": [
+                  {
+                    "id": "CCC.C06.TR02_smt",
+                    "name": "statement",
+                    "prose": "When a deployment request is made, the service MUST validate that\nreplication of data, backups, and disaster recovery operations\nwill not occur in restricted regions or availability zones.\n"
+                  },
+                  {
+                    "id": "CCC.C06.TR02_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C06.TR02_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C06.TR02"
+              }
+            ],
+            "id": "CCC.C06",
+            "links": [
+              {
+                "href": "https://example/versions/2024.1#ccc.c06",
+                "rel": "canonical"
+              }
+            ],
+            "parts": [
+              {
+                "id": "CCC.C06_smt",
+                "name": "statement",
+                "prose": "Ensure that resources are not provisioned or deployed in\ngeographic regions or cloud availability zones that have been\ndesignated as restricted or prohibited, to comply with\nregulatory requirements and reduce exposure to geopolitical\nrisks.\n"
+              }
+            ],
+            "title": "Prevent Deployment in Restricted Regions"
+          },
+          {
+            "class": "data-protection",
+            "controls": [
+              {
+                "id": "CCC.C08.TR01",
+                "parts": [
+                  {
+                    "id": "CCC.C08.TR01_smt",
+                    "name": "statement",
+                    "prose": "When data is stored, the service MUST ensure that data is\nreplicated across multiple availability zones or regions.\n"
+                  },
+                  {
+                    "id": "CCC.C08.TR01_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C08.TR01_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C08.TR01"
+              },
+              {
+                "id": "CCC.C08.TR02",
+                "parts": [
+                  {
+                    "id": "CCC.C08.TR02_smt",
+                    "name": "statement",
+                    "prose": "When data is replicated across multiple zones or regions,\nthe service MUST be able to verify the replication state,\nincluding the replication locations and data synchronization\nstatus.\n"
+                  },
+                  {
+                    "id": "CCC.C08.TR02_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C08.TR02_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C08.TR02"
+              }
+            ],
+            "id": "CCC.C08",
+            "links": [
+              {
+                "href": "https://example/versions/2024.1#ccc.c08",
+                "rel": "canonical"
+              }
+            ],
+            "parts": [
+              {
+                "id": "CCC.C08_smt",
+                "name": "statement",
+                "prose": "Ensure that data is replicated across multiple\nzones or regions to protect against data loss due to hardware\nfailures, natural disasters, or other catastrophic events.\n"
+              }
+            ],
+            "title": "Enable Multi-zone or Multi-region Data Replication"
+          },
+          {
+            "class": "data-protection",
+            "controls": [
+              {
+                "id": "CCC.C09.TR01",
+                "parts": [
+                  {
+                    "id": "CCC.C09.TR01_smt",
+                    "name": "statement",
+                    "prose": "When access logs are stored, the service MUST ensure that\naccess logs cannot be accessed without proper authorization.\n"
+                  },
+                  {
+                    "id": "CCC.C09.TR01_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C09.TR01_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C09.TR01"
+              },
+              {
+                "id": "CCC.C09.TR02",
+                "parts": [
+                  {
+                    "id": "CCC.C09.TR02_smt",
+                    "name": "statement",
+                    "prose": "When access logs are stored, the service MUST ensure that\naccess logs cannot be modified without proper authorization.\n"
+                  },
+                  {
+                    "id": "CCC.C09.TR02_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C09.TR02_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C09.TR02"
+              },
+              {
+                "id": "CCC.C09.TR03",
+                "parts": [
+                  {
+                    "id": "CCC.C09.TR03_smt",
+                    "name": "statement",
+                    "prose": "When access logs are stored, the service MUST ensure that\naccess logs cannot be deleted without proper authorization.\n"
+                  },
+                  {
+                    "id": "CCC.C09.TR03_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C09.TR03_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C09.TR03"
+              }
+            ],
+            "id": "CCC.C09",
+            "links": [
+              {
+                "href": "https://example/versions/2024.1#ccc.c09",
+                "rel": "canonical"
+              }
+            ],
+            "parts": [
+              {
+                "id": "CCC.C09_smt",
+                "name": "statement",
+                "prose": "Access logs should always be considered sensitive.\nEnsure that access logs are protected against unauthorized\naccess, tampering, or deletion.\n"
+              }
+            ],
+            "title": "Prevent Tampering, Deletion, or Unauthorized Access to Access Logs"
+          },
+          {
+            "class": "data-protection",
+            "controls": [
+              {
+                "id": "CCC.C10.TR01",
+                "parts": [
+                  {
+                    "id": "CCC.C10.TR01_smt",
+                    "name": "statement",
+                    "prose": "When data is replicated, the service MUST ensure that\nreplication is restricted to explicitly trusted destinations.\n"
+                  },
+                  {
+                    "id": "CCC.C10.TR01_obj",
+                    "links": [
+                      {
+                        "href": "#CCC.C10.TR01_smt",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective"
+                  }
+                ],
+                "title": "CCC.C10.TR01"
+              }
+            ],
+            "id": "CCC.C10",
+            "links": [
+              {
+                "href": "https://example/versions/2024.1#ccc.c10",
+                "rel": "canonical"
+              }
+            ],
+            "parts": [
+              {
+                "id": "CCC.C10_smt",
+                "name": "statement",
+                "prose": "Prevent replication of data to untrusted destinations outside\nof defined trust perimeter. An untrusted destination is defined\nas a resource that exists outside of a specified trusted\nidentity or network or data perimeter.\n"
+              }
+            ],
+            "title": "Prevent Data Replication to Destinations Outside of Defined\\nTrust Perimeter"
+          }
+        ],
+        "id": "data-protection",
+        "title": "Data protection controls ensure that data is protected from unauthorized\\naccess, disclosure, and tampering. This includes encryption of data at\\nrest and in transit, access controls, and data retention policies.\\n"
+      }
+    ],
+    "metadata": {
+      "last-modified": "2026-06-03T03:00:46.306495-05:00",
+      "links": [
+        {
+          "href": "https://example/versions/2024.1#",
+          "rel": "canonical"
+        }
+      ],
+      "oscal-version": "1.1.3",
+      "parties": [
+        {
+          "name": "FINOS",
+          "type": "person",
+          "uuid": "c25bdc92-fe3f-441f-ab96-5a3ed257a28c"
+        }
+      ],
+      "responsible-parties": [
+        {
+          "party-uuids": [
+            "c25bdc92-fe3f-441f-ab96-5a3ed257a28c"
+          ],
+          "role-id": "author"
+        }
+      ],
+      "roles": [
+        {
+          "description": "Author and owner of the document",
+          "id": "author",
+          "title": "Author"
+        }
+      ],
+      "title": "FINOS Cloud Control Catalog",
+      "version": "2024.1"
+    },
+    "uuid": "0414293d-6afd-4d7c-afa2-f9fd4c0a8e99"
+  }
+}

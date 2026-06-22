@@ -219,11 +219,16 @@ function ThreatView({ threat }: ThreatViewProps) {
       {threat.actors && threat.actors.length > 0 ? (
         <Actors actors={threat.actors} />
       ) : null}
-      {threat.capabilities && threat.capabilities.length > 0 ? (
-        <Mappings label="Capabilities" mappings={threat.capabilities} />
-      ) : null}
-      {threat.vectors && threat.vectors.length > 0 ? (
-        <Mappings label="Vectors" mappings={threat.vectors} />
+      {(threat.capabilities && threat.capabilities.length > 0) ||
+      (threat.vectors && threat.vectors.length > 0) ? (
+        <References>
+          {threat.capabilities && threat.capabilities.length > 0 ? (
+            <Mappings label="Capabilities" mappings={threat.capabilities} />
+          ) : null}
+          {threat.vectors && threat.vectors.length > 0 ? (
+            <Mappings label="Vectors" mappings={threat.vectors} />
+          ) : null}
+        </References>
       ) : null}
     </article>
   );
@@ -245,6 +250,17 @@ function Actors({ actors }: ActorsProps) {
         ))}
       </ul>
     </section>
+  );
+}
+
+function References({ children }: { children: ReactNode }) {
+  return (
+    <details data-gemara-part="references">
+      <summary data-gemara-part="references-summary">
+        References to Other Documents
+      </summary>
+      {children}
+    </details>
   );
 }
 
@@ -301,5 +317,6 @@ export const ThreatCatalog = Object.assign(ThreatCatalogRoot, {
   Group: GroupView,
   Threat: ThreatView,
   Actors,
+  References,
   Mappings,
 });

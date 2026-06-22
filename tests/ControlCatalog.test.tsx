@@ -79,6 +79,29 @@ describe("ControlCatalog", () => {
     }
   });
 
+  it("groups guideline and threat mappings in a collapsed References section", () => {
+    const { container } = render(<ControlCatalog data={data} />);
+    const details = container.querySelector(
+      "details[data-gemara-part='references']",
+    ) as HTMLDetailsElement | null;
+    expect(details).not.toBeNull();
+    // Collapsed by default: no `open` attribute, stays server-component-clean.
+    expect(details?.open).toBe(false);
+    const summary = details?.querySelector(
+      "summary[data-gemara-part='references-summary']",
+    );
+    expect(summary?.textContent).toBe("References to Other Documents");
+    // The existing mapping sections live inside the disclosure, not loose.
+    expect(
+      details?.querySelector("[data-gemara-part='mappings']"),
+    ).not.toBeNull();
+    expect(
+      container.querySelector(
+        "details[data-gemara-part='references'] [data-gemara-mappings-label='guidelines']",
+      ),
+    ).not.toBeNull();
+  });
+
   it("uses linkResolver from context for cross-references", () => {
     const Resolver = ({ children }: { children: React.ReactNode }) => (
       <GemaraProvider

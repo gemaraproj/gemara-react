@@ -65,9 +65,10 @@ When `children` is provided, it **takes over** rendering entirely — the root d
 
 Renderers emit semantic HTML with `data-gemara-*` attributes and no styling. The attribute taxonomy is the public API for CSS:
 - `data-gemara-artifact="ControlCatalog"` on the root `<article>`.
-- `data-gemara-part="header" | "groups" | "group" | "control" | "control-id" | "control-title" | "objective" | "requirements" | "requirement" | "applicability" | "mappings" | "control-list"` for structural slots.
+- `data-gemara-part="header" | "groups" | "group" | "control" | "control-id" | "control-title" | "objective" | "requirements" | "requirement" | "applicability" | "references" | "references-summary" | "mappings" | "control-list"` for structural slots.
 - `data-gemara-control-id`, `data-gemara-group-id`, `data-gemara-requirement-id`, `data-gemara-id` for stable selectors.
-- `data-gemara-mappings-label="guidelines" | "threats"` to distinguish mapping sections.
+- `data-gemara-part="references"` is an *uncontrolled* native `<details>` (collapsed by default, no `open`) wrapping a control/threat/guideline's mapping sections, with `data-gemara-part="references-summary"` on its `<summary>` ("References to Other Documents"). It carries no client JS — that's why it can live in the server-component-clean renderers (unlike `CollapsibleGroup`, whose `useState` forces it into `/interactive`). Consumers style open/closed via the native `details[open]` selector.
+- `data-gemara-mappings-label="guidelines" | "threats" | "principles" | "capabilities" | "vectors"` to distinguish mapping sections (each nested inside `references`).
 - `data-gemara-ref="artifact" | "entry" | "mapping-reference"` + `data-gemara-ref-id` on resolver output.
 - `data-gemara-prose=""` on the wrapper element emitted by the `Prose` primitive (text fields rendered as plain text with `white-space: pre-wrap`).
 - `data-gemara-part="format-tabs" | "format-tablist" | "format-tab" | "format-panel" | "format-code"` on the `FormatTabs` interactive viewer, with `data-gemara-tab-id` on tabs/panels, `data-gemara-selected=""` on the active tab, and `data-gemara-language` on the code `<pre>`. `FormatTabs` does no conversion — the consumer supplies the Preview node and pre-converted (gemaraconv, server-side) format strings as props.

@@ -226,11 +226,16 @@ function ControlView({ control }: ControlViewProps) {
       {control["assessment-requirements"] && control["assessment-requirements"].length > 0 ? (
         <RequirementList requirements={control["assessment-requirements"]} />
       ) : null}
-      {control.guidelines && control.guidelines.length > 0 ? (
-        <Mappings label="Guidelines" mappings={control.guidelines} />
-      ) : null}
-      {control.threats && control.threats.length > 0 ? (
-        <Mappings label="Threats" mappings={control.threats} />
+      {(control.guidelines && control.guidelines.length > 0) ||
+      (control.threats && control.threats.length > 0) ? (
+        <References>
+          {control.guidelines && control.guidelines.length > 0 ? (
+            <Mappings label="Guidelines" mappings={control.guidelines} />
+          ) : null}
+          {control.threats && control.threats.length > 0 ? (
+            <Mappings label="Threats" mappings={control.threats} />
+          ) : null}
+        </References>
       ) : null}
     </article>
   );
@@ -261,6 +266,17 @@ function RequirementList({ requirements }: RequirementListProps) {
         ))}
       </ol>
     </section>
+  );
+}
+
+function References({ children }: { children: ReactNode }) {
+  return (
+    <details data-gemara-part="references">
+      <summary data-gemara-part="references-summary">
+        References to Other Documents
+      </summary>
+      {children}
+    </details>
   );
 }
 
@@ -317,5 +333,6 @@ export const ControlCatalog = Object.assign(ControlCatalogRoot, {
   Group: GroupView,
   Control: ControlView,
   Requirements: RequirementList,
+  References,
   Mappings,
 });
