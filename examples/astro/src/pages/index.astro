@@ -15,6 +15,10 @@ import MultiFormatViewer from "../components/MultiFormatViewer.tsx";
 // then committed as a fixture. `?raw` hands us the file as an opaque string —
 // exactly what a `fetch()` against the hub API would give you.
 import oscal from "../fixtures/good-ccc.oscal.json?raw";
+// The Markdown projection comes from go-gemara's `ControlCatalog(c).ToMarkdown`.
+// (gemaraconv has no CLI for it, so the fixture was generated with a one-off
+// program and committed.) Same `?raw` import — an opaque string we display.
+import markdown from "../fixtures/good-ccc.md?raw";
 
 // Load a fixture from the canonical gemara repo at build time. In a real app
 // this would come from the hub API or a content collection.
@@ -65,9 +69,16 @@ const firstGroupId = data.groups?.[0]?.id ?? "";
 
     <h2>Multi-format viewer (client:idle)</h2>
     <p>
-      Preview + raw YAML + OSCAL. The OSCAL is pre-converted by go-gemara and
-      passed in as a string; the component does no conversion or validation.
+      Preview (rendered from the structured data) + raw YAML, Markdown, and
+      OSCAL. The Markdown and OSCAL are pre-converted by go-gemara and passed in
+      as strings; the component does no conversion or validation.
     </p>
-    <MultiFormatViewer client:idle data={data} yaml={raw} oscal={oscal} />
+    <MultiFormatViewer
+      client:idle
+      data={data}
+      yaml={raw}
+      markdown={markdown}
+      oscal={oscal}
+    />
   </body>
 </html>

@@ -9,6 +9,8 @@ interface Props {
   data: ControlCatalogData;
   /** The raw source the page already read — no go-gemara round-trip needed. */
   yaml: string;
+  /** Markdown projection produced server-side by go-gemara's `ToMarkdown`. */
+  markdown: string;
   /** OSCAL projection produced server-side by go-gemara's `oscalexport`. */
   oscal: string;
 }
@@ -27,7 +29,7 @@ interface Props {
  *  2. The raw YAML tab is just the source string the page already has.
  *  3. The component never converts or validates; go-gemara produced the OSCAL.
  */
-export default function MultiFormatViewer({ data, yaml, oscal }: Props) {
+export default function MultiFormatViewer({ data, yaml, markdown, oscal }: Props) {
   // `JSON.stringify(JSON.parse(x), null, 2)` normalizes a compact API response
   // into indented JSON. It's a no-op on already-indented OSCAL like ours, but
   // shows the idiom for when the string arrives as one flat line from the hub.
@@ -44,6 +46,7 @@ export default function MultiFormatViewer({ data, yaml, oscal }: Props) {
             preview: <ControlCatalog data={data} headingLevel={3} />,
           },
           { id: "yaml", label: "YAML", language: "yaml", content: yaml },
+          { id: "markdown", label: "Markdown", language: "markdown", content: markdown },
           { id: "oscal", label: "OSCAL", language: "json", content: prettyOscal },
         ]}
       />
