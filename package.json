@@ -1,6 +1,6 @@
 {
   "name": "@gemara/react",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Headless React renderers for Gemara artifacts.",
   "license": "Apache-2.0",
   "repository": {
