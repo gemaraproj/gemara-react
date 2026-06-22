@@ -108,6 +108,22 @@ describe("ThreatCatalog", () => {
     }
   });
 
+  it("groups capability and vector mappings in a collapsed References section", () => {
+    const { container } = render(<ThreatCatalog data={data} />);
+    const details = container.querySelector(
+      "details[data-gemara-part='references']",
+    ) as HTMLDetailsElement | null;
+    expect(details).not.toBeNull();
+    expect(details?.open).toBe(false);
+    expect(
+      details?.querySelector("summary[data-gemara-part='references-summary']")
+        ?.textContent,
+    ).toBe("References to Other Documents");
+    expect(
+      details?.querySelector("[data-gemara-mappings-label='capabilities']"),
+    ).not.toBeNull();
+  });
+
   it("uses linkResolver from context for capability/vector mappings", () => {
     const Resolver = ({ children }: { children: React.ReactNode }) => (
       <GemaraProvider

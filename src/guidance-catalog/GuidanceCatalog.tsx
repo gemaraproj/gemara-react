@@ -223,7 +223,9 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
         </section>
       ) : null}
       {guideline.principles && guideline.principles.length > 0 ? (
-        <Mappings label="Principles" mappings={guideline.principles} />
+        <References>
+          <Mappings label="Principles" mappings={guideline.principles} />
+        </References>
       ) : null}
       {guideline.extends ? (
         <p data-gemara-part="extends">
@@ -239,6 +241,17 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
         </p>
       ) : null}
     </article>
+  );
+}
+
+function References({ children }: { children: ReactNode }) {
+  return (
+    <details data-gemara-part="references">
+      <summary data-gemara-part="references-summary">
+        References to Other Documents
+      </summary>
+      {children}
+    </details>
   );
 }
 
@@ -290,5 +303,6 @@ export const GuidanceCatalog = Object.assign(GuidanceCatalogRoot, {
   Groups,
   Group: GroupView,
   Guideline: GuidelineView,
+  References,
   Mappings,
 });
