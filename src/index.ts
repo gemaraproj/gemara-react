@@ -14,6 +14,13 @@ export type {
   PrincipleCatalog as PrincipleCatalogData,
   ThreatCatalog as ThreatCatalogData,
   VectorCatalog as VectorCatalogData,
+  RiskCatalog as RiskCatalogData,
+  Policy as PolicyData,
+  Lexicon as LexiconData,
+  MappingDocument as MappingDocumentData,
+  AuditLog as AuditLogData,
+  EnforcementLog as EnforcementLogData,
+  EvaluationLog as EvaluationLogData,
 } from "./generated/types.js";
 export {
   ARTIFACT_TYPES,
@@ -23,5 +30,12 @@ export {
   isPrincipleCatalog,
   isThreatCatalog,
   isVectorCatalog,
+  isRiskCatalog,
+  isPolicy,
+  isLexicon,
+  isMappingDocument,
+  isAuditLog,
+  isEnforcementLog,
+  isEvaluationLog,
   detectArtifactType,
 } from "./generated/types.js";

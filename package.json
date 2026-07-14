@@ -70,6 +70,41 @@
       "import": "./dist/vector-catalog/index.js",
       "require": "./dist/vector-catalog/index.cjs"
     },
+    "./risk-catalog": {
+      "types": "./dist/risk-catalog/index.d.ts",
+      "import": "./dist/risk-catalog/index.js",
+      "require": "./dist/risk-catalog/index.cjs"
+    },
+    "./policy": {
+      "types": "./dist/policy/index.d.ts",
+      "import": "./dist/policy/index.js",
+      "require": "./dist/policy/index.cjs"
+    },
+    "./lexicon": {
+      "types": "./dist/lexicon/index.d.ts",
+      "import": "./dist/lexicon/index.js",
+      "require": "./dist/lexicon/index.cjs"
+    },
+    "./mapping-document": {
+      "types": "./dist/mapping-document/index.d.ts",
+      "import": "./dist/mapping-document/index.js",
+      "require": "./dist/mapping-document/index.cjs"
+    },
+    "./audit-log": {
+      "types": "./dist/audit-log/index.d.ts",
+      "import": "./dist/audit-log/index.js",
+      "require": "./dist/audit-log/index.cjs"
+    },
+    "./enforcement-log": {
+      "types": "./dist/enforcement-log/index.d.ts",
+      "import": "./dist/enforcement-log/index.js",
+      "require": "./dist/enforcement-log/index.cjs"
+    },
+    "./evaluation-log": {
+      "types": "./dist/evaluation-log/index.d.ts",
+      "import": "./dist/evaluation-log/index.js",
+      "require": "./dist/evaluation-log/index.cjs"
+    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "import": "./dist/primitives/index.js",

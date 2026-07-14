@@ -5,8 +5,10 @@
  * Pulls the Gemara OpenAPI schema, runs openapi-typescript over it, then
  * post-processes to:
  *   - emit a typed `ArtifactType` union literal mirroring metadata.cue,
- *   - emit `Catalog`-shaped aliases for ControlCatalog / GuidanceCatalog,
- *   - emit type guards `isControlCatalog` / `isGuidanceCatalog`.
+ *   - emit narrowed aliases (metadata.type pinned to the literal, plus
+ *     restoration of fields the OpenAPI generator drops or collapses) for all
+ *     13 artifact types,
+ *   - emit an `is<Type>` runtime guard per artifact type.
  *
  * This is the TS analogue of go-gemara/cmd/typestagger.
  *
@@ -295,6 +297,129 @@ export type ThreatCatalog = Omit<Schemas["ThreatCatalog"], "metadata" | "threats
   >;
 };
 
+/**
+ * A loaded RiskCatalog with the discriminator narrowed to the literal.
+ *
+ * The OpenAPI generator drops the embedded \`#Catalog\` mixin field \`title\` and
+ * the \`#Group\` fields embedded in \`#RiskCategory\` (id/title/description) —
+ * restore both. Risk \`threats\` mappings get the same MultiEntryMapping
+ * restoration as Control/Guidance/Threat.
+ */
+export type RiskCatalog = Omit<Schemas["RiskCatalog"], "metadata" | "groups" | "risks"> & {
+  metadata: Schemas["Metadata"] & { type: "RiskCatalog" };
+  groups?: Array<Schemas["Group"] & Schemas["RiskCategory"]>;
+  title?: string;
+  risks?: Array<
+    Omit<NonNullable<Schemas["RiskCatalog"]["risks"]>[number], "threats"> & {
+      threats?: MultiEntryMapping[];
+    }
+  >;
+};
+
+/**
+ * A loaded Policy with the discriminator narrowed to the literal.
+ *
+ * Policy is not a \`#Catalog\`, so there are no groups/title mixin fields to
+ * restore, but the CUE conjunctions \`#AcceptedMethod & {type: ...}\` inside
+ * \`#Adherence\` / \`#AssessmentPlan\` collapse to bare strings in the OpenAPI —
+ * restore the \`AcceptedMethod\` shape.
+ */
+export type Policy = Omit<Schemas["Policy"], "metadata" | "adherence"> & {
+  metadata: Schemas["Metadata"] & { type: "Policy" };
+  adherence: Omit<
+    Schemas["Adherence"],
+    "evaluation-methods" | "enforcement-methods" | "assessment-plans"
+  > & {
+    "evaluation-methods"?: Schemas["AcceptedMethod"][];
+    "enforcement-methods"?: Schemas["AcceptedMethod"][];
+    "assessment-plans"?: Array<
+      Omit<Schemas["AssessmentPlan"], "evaluation-methods"> & {
+        "evaluation-methods": Schemas["AcceptedMethod"][];
+      }
+    >;
+  };
+};
+
+/**
+ * A loaded Lexicon with the discriminator narrowed to the literal.
+ *
+ * \`_uniqueTermIds\` is a hidden CUE validation map that leaks into the OpenAPI
+ * as a required field; real documents never carry it, so it is omitted.
+ */
+export type Lexicon = Omit<Schemas["Lexicon"], "metadata" | "_uniqueTermIds"> & {
+  metadata: Schemas["Metadata"] & { type: "Lexicon" };
+};
+
+/**
+ * A loaded MappingDocument with the discriminator narrowed to the literal.
+ *
+ * The generated \`metadata\` keeps only the conditional \`mapping-references\`
+ * overlay and loses the base \`#Metadata\` fields (including \`type\`) — restore
+ * both. \`#_MappingStrict\` collapses to \`string\` in the OpenAPI, so \`mappings\`
+ * is restored to the underlying \`Mapping\` shape. \`_uniqueMappingIds\` is a
+ * leaked hidden CUE field (same story as Lexicon) and is omitted.
+ */
+export type MappingDocument = Omit<
+  Schemas["MappingDocument"],
+  "metadata" | "mappings" | "_uniqueMappingIds"
+> & {
+  metadata: Schemas["Metadata"] & {
+    type: "MappingDocument";
+    "mapping-references": Schemas["MappingReference"][];
+  };
+  mappings: Schemas["Mapping"][];
+};
+
+/**
+ * A loaded AuditLog with the discriminator narrowed to the literal.
+ *
+ * AuditLog embeds \`#Log\`, whose \`target\` field the OpenAPI generator drops —
+ * restored here (optional, matching the defensive treatment of restored
+ * catalog mixin fields). Each result's \`criteria-reference\` gets the
+ * MultiEntryMapping restoration.
+ */
+export type AuditLog = Omit<Schemas["AuditLog"], "metadata" | "results"> & {
+  metadata: Schemas["Metadata"] & { type: "AuditLog" };
+  target?: Schemas["Resource"];
+  results: Array<
+    Omit<Schemas["AuditResult"], "criteria-reference"> & {
+      "criteria-reference": MultiEntryMapping;
+    }
+  >;
+};
+
+/**
+ * A loaded EnforcementLog with the discriminator narrowed to the literal.
+ *
+ * The CUE conditional constraint on \`actions\` ("Clear dispositions only
+ * contain Passed results") collapses the OpenAPI \`actions\` items to empty
+ * objects — restore the \`ActionResult\` shape. \`target\` comes from the dropped
+ * \`#Log\` embed (same as AuditLog).
+ */
+export type EnforcementLog = Omit<Schemas["EnforcementLog"], "metadata" | "actions"> & {
+  metadata: Schemas["Metadata"] & { type: "EnforcementLog" };
+  target?: Schemas["Resource"];
+  actions: Schemas["ActionResult"][];
+};
+
+/**
+ * A loaded EvaluationLog with the discriminator narrowed to the literal.
+ *
+ * \`target\` comes from the dropped \`#Log\` embed. The CUE constraint tying
+ * assessment-log reference-ids to the control collapses each evaluation's
+ * \`assessment-logs\` items to \`{ requirement: { "reference-id" } }\` — restore
+ * the full \`AssessmentLog\` shape.
+ */
+export type EvaluationLog = Omit<Schemas["EvaluationLog"], "metadata" | "evaluations"> & {
+  metadata: Schemas["Metadata"] & { type: "EvaluationLog" };
+  target?: Schemas["Resource"];
+  evaluations: Array<
+    Omit<Schemas["ControlEvaluation"], "assessment-logs"> & {
+      "assessment-logs": Schemas["AssessmentLog"][];
+    }
+  >;
+};
+
 /** Minimal shape we rely on for type discrimination at runtime. */
 type WithDiscriminator = { metadata?: { type?: string } };
 
@@ -327,6 +452,34 @@ export function isCapabilityCatalog(x: unknown): x is CapabilityCatalog {
 
 export function isThreatCatalog(x: unknown): x is ThreatCatalog {
   return discriminator(x) === "ThreatCatalog";
+}
+
+export function isRiskCatalog(x: unknown): x is RiskCatalog {
+  return discriminator(x) === "RiskCatalog";
+}
+
+export function isPolicy(x: unknown): x is Policy {
+  return discriminator(x) === "Policy";
+}
+
+export function isLexicon(x: unknown): x is Lexicon {
+  return discriminator(x) === "Lexicon";
+}
+
+export function isMappingDocument(x: unknown): x is MappingDocument {
+  return discriminator(x) === "MappingDocument";
+}
+
+export function isAuditLog(x: unknown): x is AuditLog {
+  return discriminator(x) === "AuditLog";
+}
+
+export function isEnforcementLog(x: unknown): x is EnforcementLog {
+  return discriminator(x) === "EnforcementLog";
+}
+
+export function isEvaluationLog(x: unknown): x is EvaluationLog {
+  return discriminator(x) === "EvaluationLog";
 }
 
 export function detectArtifactType(x: unknown): ArtifactType | undefined {

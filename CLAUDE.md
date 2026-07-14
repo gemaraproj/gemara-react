@@ -63,8 +63,8 @@ When `children` is provided, it **takes over** rendering entirely — the root d
 
 ### Headless contract
 
-Renderers emit semantic HTML with `data-gemara-*` attributes and no styling. The attribute taxonomy is the public API for CSS:
-- `data-gemara-artifact="ControlCatalog"` on the root `<article>`.
+Renderers emit semantic HTML with `data-gemara-*` attributes and no styling. The attribute taxonomy is the public API for CSS. **README's "Styling: the `data-gemara-*` taxonomy" section is the exhaustive source of truth** across all 13 artifact renderers — per-artifact part lists, stable id selectors (`data-gemara-*-id`), value-carrying selectors (`data-gemara-severity`, `data-gemara-result`, `data-gemara-disposition`, …), and `data-gemara-empty` placeholders for empty lists. Update it in lockstep with any taxonomy change. The core shape, using ControlCatalog as the example:
+- `data-gemara-artifact="ControlCatalog"` (one value per artifact type) on the root `<article>`, with `data-gemara-id` carrying `metadata.id`.
 - `data-gemara-part="header" | "groups" | "group" | "control" | "control-id" | "control-title" | "objective" | "requirements" | "requirement" | "applicability" | "references" | "references-summary" | "mappings" | "control-list"` for structural slots.
 - `data-gemara-control-id`, `data-gemara-group-id`, `data-gemara-requirement-id`, `data-gemara-id` for stable selectors.
 - `data-gemara-part="references"` is an *uncontrolled* native `<details>` (collapsed by default, no `open`) wrapping a control/threat/guideline's mapping sections, with `data-gemara-part="references-summary"` on its `<summary>` ("References to Other Documents"). It carries no client JS — that's why it can live in the server-component-clean renderers (unlike `CollapsibleGroup`, whose `useState` forces it into `/interactive`). Consumers style open/closed via the native `details[open]` selector.
