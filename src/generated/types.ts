@@ -88,6 +88,8 @@ export interface components {
             description: string;
             /** @description End is the timestamp when the assessment concluded. */
             end?: components["schemas"]["Datetime"];
+            /** @description Evidence records the raw data cited to support this assessment's opinion. */
+            evidence?: components["schemas"]["Evidence"][];
             /** @description Message provides additional context about the assessment result. */
             message: string;
             /** @description Plan maps to the policy assessment plan being executed. */
@@ -348,20 +350,20 @@ export interface components {
             result: components["schemas"]["Result"];
         };
         EvaluationMethodType: string;
-        /** @description Evidence records a specific data source consulted during an audit */
+        /** @description Evidence records what was cited to support an opinion for a specific activity: */
         Evidence: {
-            /** @description collected is the timestamp when the evidence was gathered */
-            collected: components["schemas"]["Datetime"];
+            /** @description collected-at is the timestamp when the evidence was gathered */
+            "collected-at": components["schemas"]["Datetime"];
             /** @description description explains what this evidence represents */
             description?: string;
             /** @description id uniquely identifies this evidence */
-            id?: string;
-            /** @description location references the artifact containing this evidence */
-            location: components["schemas"]["ArtifactMapping"];
+            id: string;
+            /** @description payload is the raw evidence data collected */
+            payload?: string;
             /** @description type categorizes the kind of evidence */
             type: components["schemas"]["EvidenceType"];
         };
-        /** @description EvidenceType categorizes the kind of evidence collected during an audit */
+        /** @description EvidenceType categorizes the kind of evidence. It remains an open enum: */
         EvidenceType: string;
         /** @description Exemption describes a single scenario where the catalog is not applicable */
         Exemption: {
@@ -686,6 +688,8 @@ export interface components {
             impact?: string;
             /** @description owner defines the RACI roles responsible for managing this risk */
             owner?: components["schemas"]["RACI"];
+            /** @description rank optionally orders risks for the same catalog (e.g. when several share the same severity). */
+            rank?: string;
             /** @description severity describes the assessed level of this risk */
             severity: components["schemas"]["Severity"];
             /** @description threats link this risk to Layer 2 threats */

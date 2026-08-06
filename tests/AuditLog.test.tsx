@@ -173,7 +173,7 @@ describe("AuditLog", () => {
     ).toContain("Scoped to release 2025.2");
   });
 
-  it("renders evidence items with type, location, and collected timestamp", () => {
+  it("renders evidence items with type and collected timestamp", () => {
     const { container } = render(<AuditLog data={data} />);
     const evidence = (data.results ?? []).flatMap((r) => r.evidence ?? []);
     expect(evidence.length).toBeGreaterThan(0);
@@ -184,19 +184,37 @@ describe("AuditLog", () => {
       const el = container.querySelector(`[data-gemara-evidence-id='${e.id}']`);
       expect(el, `expected rendered evidence ${e.id}`).not.toBeNull();
       expect(el?.getAttribute("data-gemara-evidence-type")).toBe(e.type);
-      // collected renders as a machine-readable <time>.
+      // collected-at renders as a machine-readable <time>.
       expect(
-        el?.querySelector(`time[datetime='${e.collected}']`),
+        el?.querySelector(`time[datetime='${e["collected-at"]}']`),
       ).not.toBeNull();
-      // location reference-id reaches the resolver output.
-      if (e.location?.["reference-id"]) {
-        expect(
-          el?.querySelector(
-            `[data-gemara-ref-id='${e.location["reference-id"]}']`,
-          ),
-        ).not.toBeNull();
-      }
     }
+  });
+
+  it("renders an evidence payload as verbatim preformatted text", () => {
+    const results = data.results ?? [];
+    const target = results.findIndex((r) => (r.evidence ?? []).length > 0);
+    if (target < 0) throw new Error("fixture has no evidence");
+    const augmented = {
+      ...data,
+      results: results.map((r, i) =>
+        i === target
+          ? {
+              ...r,
+              evidence: (r.evidence ?? []).map((e, j) =>
+                j === 0 ? { ...e, payload: '{"score":42}' } : e,
+              ),
+            }
+          : r,
+      ),
+    };
+    const { container } = render(<AuditLog data={augmented} />);
+    const payload = container.querySelector(
+      "[data-gemara-part='evidence-payload']",
+    );
+    expect(payload).not.toBeNull();
+    expect(payload?.tagName).toBe("PRE");
+    expect(payload?.textContent).toBe('{"score":42}');
   });
 
   it("renders recommendations and reflects the required flag", () => {

@@ -257,6 +257,34 @@ describe("EvaluationLog", () => {
     expect(container.querySelector("h1[data-gemara-part='title']")).not.toBeNull();
   });
 
+  it("renders assessment evidence with a structured payload as JSON", () => {
+    const { container } = render(<EvaluationLog data={data} />);
+    const evidence = (data.evaluations ?? []).flatMap((ev) =>
+      (ev["assessment-logs"] ?? []).flatMap((l) => l.evidence ?? []),
+    );
+    expect(evidence.length).toBeGreaterThan(0);
+    expect(
+      container.querySelectorAll("[data-gemara-part='evidence-item']").length,
+    ).toBe(evidence.length);
+    for (const e of evidence) {
+      const el = container.querySelector(
+        `[data-gemara-evidence-id='${e.id}']`,
+      );
+      expect(el, `expected rendered evidence ${e.id}`).not.toBeNull();
+      expect(el?.getAttribute("data-gemara-evidence-type")).toBe(e.type);
+      expect(
+        el?.querySelector(`time[datetime='${e["collected-at"]}']`),
+      ).not.toBeNull();
+      if (e.payload === undefined || e.payload === null) continue;
+      const payload = el?.querySelector(
+        "[data-gemara-part='evidence-payload']",
+      );
+      expect(payload?.tagName).toBe("PRE");
+      // The fixture's payload is a YAML map, so it serializes to JSON.
+      expect(payload?.textContent).toBe(JSON.stringify(e.payload, null, 2));
+    }
+  });
+
   it("offsets all headings when headingLevel is set", () => {
     const { container } = render(<EvaluationLog data={data} headingLevel={3} />);
     expect(container.querySelector("h3[data-gemara-part='title']")).not.toBeNull();

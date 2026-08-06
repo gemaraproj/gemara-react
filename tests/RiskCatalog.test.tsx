@@ -239,6 +239,28 @@ describe("RiskCatalog", () => {
     expect(container.querySelector("h1[data-gemara-part='title']")).not.toBeNull();
   });
 
+  it("renders the optional risk rank and mirrors it onto the risk element", () => {
+    const { container } = render(<RiskCatalog data={data} />);
+    const ranked = (data.risks ?? []).filter(
+      (r) => r.rank !== undefined && r.rank !== null,
+    );
+    expect(ranked.length).toBeGreaterThan(0);
+    for (const r of ranked) {
+      const el = container.querySelector(`[data-gemara-risk-id='${r.id}']`);
+      expect(el, `expected rendered risk ${r.id}`).not.toBeNull();
+      expect(el?.getAttribute("data-gemara-rank")).toBe(String(r.rank));
+      expect(
+        el?.querySelector("[data-gemara-part='rank']")?.textContent,
+      ).toContain(String(r.rank));
+    }
+    // Risks without a rank must not carry the attribute at all.
+    const unranked = (data.risks ?? []).filter((r) => r.rank === undefined);
+    for (const r of unranked) {
+      const el = container.querySelector(`[data-gemara-risk-id='${r.id}']`);
+      expect(el?.hasAttribute("data-gemara-rank")).toBe(false);
+    }
+  });
+
   it("offsets all headings when headingLevel is set", () => {
     const { container } = render(<RiskCatalog data={data} headingLevel={3} />);
     expect(container.querySelector("h3[data-gemara-part='title']")).not.toBeNull();

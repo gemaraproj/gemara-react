@@ -322,6 +322,9 @@ function AssessmentLogView({ log }: AssessmentLogViewProps) {
           Confidence: {log["confidence-level"]}
         </p>
       ) : null}
+      {log.evidence && log.evidence.length > 0 ? (
+        <EvidenceList evidence={log.evidence} />
+      ) : null}
       {log.plan ? (
         <p data-gemara-part="plan">
           Plan:{" "}
@@ -377,6 +380,57 @@ function AssessmentLogView({ log }: AssessmentLogViewProps) {
         </p>
       ) : null}
     </article>
+  );
+}
+
+type Evidence = NonNullable<AssessmentLog["evidence"]>[number];
+
+interface EvidenceListProps {
+  evidence: Evidence[];
+}
+
+/**
+ * Raw data cited to support an assessment's opinion. Mirrors the AuditLog
+ * evidence taxonomy so consumers style both with one rule set.
+ */
+function EvidenceList({ evidence }: EvidenceListProps) {
+  return (
+    <section data-gemara-part="evidence">
+      <Heading offset={4}>Evidence</Heading>
+      <ul>
+        {evidence.map((e, i) => (
+          <li
+            key={`${e.id ?? "evidence"}-${i}`}
+            data-gemara-part="evidence-item"
+            data-gemara-evidence-id={e.id ?? ""}
+            data-gemara-evidence-type={e.type ?? ""}
+          >
+            <p>
+              {e.id ? (
+                <>
+                  <span data-gemara-part="evidence-id">{e.id}</span>
+                  {" — "}
+                </>
+              ) : null}
+              <span data-gemara-part="evidence-type">{e.type}</span>
+            </p>
+            {e.description ? <Prose content={e.description} as="p" /> : null}
+            {e["collected-at"] ? (
+              <p data-gemara-part="evidence-collected">
+                Collected: <DateTime value={e["collected-at"]} />
+              </p>
+            ) : null}
+            {e.payload !== undefined && e.payload !== null ? (
+              <pre data-gemara-part="evidence-payload">
+                {typeof e.payload === "string"
+                  ? e.payload
+                  : JSON.stringify(e.payload, null, 2)}
+              </pre>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

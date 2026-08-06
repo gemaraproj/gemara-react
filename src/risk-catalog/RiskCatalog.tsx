@@ -253,6 +253,7 @@ function RiskView({ risk }: RiskViewProps) {
       data-gemara-part="risk"
       data-gemara-risk-id={risk.id ?? ""}
       data-gemara-severity={risk.severity ?? ""}
+      data-gemara-rank={risk.rank ?? undefined}
       id={risk.id ? `risk-${risk.id}` : undefined}
     >
       <header>
@@ -273,6 +274,9 @@ function RiskView({ risk }: RiskViewProps) {
       ) : null}
       {risk.severity ? (
         <p data-gemara-part="severity">Severity: {risk.severity}</p>
+      ) : null}
+      {risk.rank !== undefined && risk.rank !== null ? (
+        <p data-gemara-part="rank">Rank: {risk.rank}</p>
       ) : null}
       {risk.impact ? (
         <section data-gemara-part="impact">

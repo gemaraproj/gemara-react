@@ -413,21 +413,17 @@ function EvidenceList({ evidence }: EvidenceListProps) {
               <span data-gemara-part="evidence-type">{e.type}</span>
             </p>
             {e.description ? <Prose content={e.description} as="p" /> : null}
-            {e.location ? (
-              <p data-gemara-part="evidence-location">
-                Location:{" "}
-                <ArtifactRef
-                  kind="artifact"
-                  id={e.location["reference-id"] ?? ""}
-                  relation="evidence"
-                />
-                {e.location.remarks ? <> — {e.location.remarks}</> : null}
+            {e["collected-at"] ? (
+              <p data-gemara-part="evidence-collected">
+                Collected: <DateTime value={e["collected-at"]} />
               </p>
             ) : null}
-            {e.collected ? (
-              <p data-gemara-part="evidence-collected">
-                Collected: <DateTime value={e.collected} />
-              </p>
+            {e.payload !== undefined && e.payload !== null ? (
+              <pre data-gemara-part="evidence-payload">
+                {typeof e.payload === "string"
+                  ? e.payload
+                  : JSON.stringify(e.payload, null, 2)}
+              </pre>
             ) : null}
           </li>
         ))}
