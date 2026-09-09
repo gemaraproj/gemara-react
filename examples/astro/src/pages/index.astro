@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { ControlCatalog } from "@gemara/react/control-catalog";
 import { GemaraProvider } from "@gemara/react/provider";
-import { isControlCatalog } from "@gemara/react";
+import { detectArtifactType, isControlCatalog } from "@gemara/react";
 import CollapsibleControlGroup from "../components/CollapsibleControlGroup.tsx";
 import MultiFormatViewer from "../components/MultiFormatViewer.tsx";
 // The OSCAL projection is produced server-side by go-gemara, never in the
@@ -20,28 +20,41 @@ import oscal from "../fixtures/good-ccc.oscal.json?raw";
 // program and committed.) Same `?raw` import — an opaque string we display.
 import markdown from "../fixtures/good-ccc.md?raw";
 
-// Load a fixture from the canonical gemara repo at build time. In a real app
-// this would come from the hub API or a content collection.
+// Load fixtures from the canonical gemara repo at build time. In a real app
+// these would come from the hub API or a content collection.
 const here = dirname(fileURLToPath(import.meta.url));
-const fixturePath = resolve(
-  here,
-  "..",
-  "..",
-  "..",
-  "..",
-  "..",
-  "gemara",
-  "test",
-  "test-data",
-  "good-ccc.yaml",
-);
-const raw = readFileSync(fixturePath, "utf8");
-const parsed = parseYaml(raw);
-if (!isControlCatalog(parsed)) {
-  throw new Error("Expected ControlCatalog at " + fixturePath);
+const fixtureDir = resolve(here, "..", "..", "..", "..", "..", "gemara", "test", "test-data");
+
+function loadFixture(name: string) {
+  const raw = readFileSync(resolve(fixtureDir, name), "utf8");
+  const parsed: unknown = parseYaml(raw);
+  const type = detectArtifactType(parsed);
+  if (!type) throw new Error("Unrecognized artifact type in " + name);
+  return { name, raw, parsed, type };
 }
-const data = parsed;
+
+const ccc = loadFixture("good-ccc.yaml");
+if (!isControlCatalog(ccc.parsed)) {
+  throw new Error("Expected ControlCatalog at " + ccc.name);
+}
+const data = ccc.parsed;
 const firstGroupId = data.groups?.[0]?.id ?? "";
+
+// One fixture per remaining artifact type: Preview + raw YAML for each.
+const others = [
+  "good-aigf.yaml",
+  "good-aigf-principles.yaml",
+  "good-aigf-vectors.yaml",
+  "good-risk-catalog.yaml",
+  "good-threat-catalog.yaml",
+  "good-capability-catalog.yaml",
+  "good-policy.yaml",
+  "good-lexicon.yaml",
+  "good-mapping-document.yaml",
+  "good-audit-log.yaml",
+  "good-enforcement-log.yaml",
+  "good-evaluation-log-unstarted.yaml",
+].map(loadFixture);
 ---
 <html lang="en">
   <head>
@@ -75,10 +88,21 @@ const firstGroupId = data.groups?.[0]?.id ?? "";
     </p>
     <MultiFormatViewer
       client:idle
+      type={ccc.type}
       data={data}
-      yaml={raw}
+      yaml={ccc.raw}
       markdown={markdown}
       oscal={oscal}
     />
+
+    <hr />
+
+    <h2>All other artifact types: Preview + raw YAML (client:idle)</h2>
+    {others.map((f) => (
+      <section>
+        <h3>{f.type} <small>({f.name})</small></h3>
+        <MultiFormatViewer client:idle type={f.type} data={f.parsed} yaml={f.raw} />
+      </section>
+    ))}
   </body>
 </html>

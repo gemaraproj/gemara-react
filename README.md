@@ -154,7 +154,7 @@ Each tab is either a `preview` node (rendered as-is) or `content` text (rendered
 - **You own which tabs exist.** There's no automatic format discovery. The raw **YAML** tab is just the source string you already parsed — no go-gemara round-trip needed (`content: rawYaml`). Only add an OSCAL or Markdown tab for artifact types that actually have a `gemaraconv` converter; for others, omit the tab.
 - **Validation lives upstream**, in go-gemara and the spec — `FormatTabs` will faithfully display malformed input. Use the empty-tab seam (`preview={<ErrorNote />}`) to surface a conversion that failed.
 
-A worked Astro example wiring all three (Preview + raw YAML + pre-converted OSCAL) lives in [`examples/astro/`](./examples/astro/src/components/MultiFormatViewer.tsx).
+A worked Astro example wiring all three (Preview + raw YAML + pre-converted Markdown/OSCAL for `ControlCatalog`, Preview + raw YAML for the other twelve artifact types) lives in [`examples/astro/`](./examples/astro/src/components/MultiFormatViewer.tsx).
 
 It implements the ARIA tabs pattern with **automatic activation** — Arrow keys move focus and switch the panel in one step (Left/Right wrap; Home/End jump to first/last). Provide `aria-label` (or `aria-labelledby`) so the tablist has an accessible name — important when several viewers share a page. Because it holds tab state, it lives in `@gemara/react/interactive` and carries `"use client"`.
 
