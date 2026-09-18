@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { DocumentReferences } from "../primitives/DocumentReferences.js";
 import type { RiskCatalog as RiskCatalogData } from "../generated/types.js";
 
 /**
@@ -122,22 +123,8 @@ function Header({ data }: HeaderProps) {
             <dd data-gemara-part="draft">{metadata.draft ? "Yes" : "No"}</dd>
           </>
         ) : null}
-        {metadata.lexicon ? (
-          <>
-            <dt>Lexicon</dt>
-            <dd data-gemara-part="lexicon">
-              <ArtifactRef
-                kind="artifact"
-                id={metadata.lexicon["reference-id"] ?? ""}
-                relation="lexicon"
-              >
-                {metadata.lexicon["reference-id"]}
-              </ArtifactRef>
-              {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
-            </dd>
-          </>
-        ) : null}
       </dl>
+      <DocumentReferences data={data} />
     </header>
   );
 }

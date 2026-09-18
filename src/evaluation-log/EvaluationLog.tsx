@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { EvaluationLog as EvaluationLogData } from "../generated/types.js";
 
 /**
@@ -135,6 +136,10 @@ function Header({ data }: WithDataProps) {
               <ArtifactRef
                 kind="artifact"
                 id={metadata.lexicon["reference-id"] ?? ""}
+                url={mappingReferenceUrl(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
                 relation="lexicon"
               />
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}

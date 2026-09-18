@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { DocumentReferences } from "../primitives/DocumentReferences.js";
 import type { ThreatCatalog as ThreatCatalogData } from "../generated/types.js";
 
 /**
@@ -105,6 +106,7 @@ function Header({ data }: HeaderProps) {
           </>
         ) : null}
       </dl>
+      <DocumentReferences data={data} />
     </header>
   );
 }

@@ -173,6 +173,7 @@ function Header({ data }: PartProps) {
               <ArtifactRef
                 kind="artifact"
                 id={lexicon["reference-id"] ?? ""}
+                url={referenceUrl(data, lexicon["reference-id"])}
                 relation="lexicon"
               >
                 {lexicon["reference-id"]}

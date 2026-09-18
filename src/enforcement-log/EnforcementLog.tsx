@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type {
   EnforcementLog as EnforcementLogData,
   Schemas,
@@ -48,9 +49,6 @@ type TargetResource = Schemas["Resource"] &
       "id" | "name" | "type" | "uri" | "version" | "description"
     >
   >;
-type MetadataWithRefs = EnforcementLogData["metadata"] & {
-  "mapping-references"?: MappingReference[];
-};
 
 export interface EnforcementLogProps {
   data: EnforcementLogData;
@@ -91,9 +89,7 @@ interface SectionProps {
 }
 
 function Header({ data }: SectionProps) {
-  // Defensive widening: metadata["mapping-references"] exists in real
-  // documents but is dropped by the OpenAPI generator (see MetadataWithRefs).
-  const metadata = data.metadata as MetadataWithRefs;
+  const { metadata } = data;
   const mappingReferences = metadata["mapping-references"] ?? [];
   return (
     <header data-gemara-part="header">
@@ -148,6 +144,10 @@ function Header({ data }: SectionProps) {
               <ArtifactRef
                 kind="artifact"
                 id={metadata.lexicon["reference-id"] ?? ""}
+                url={mappingReferenceUrl(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
                 relation="lexicon"
               />
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}

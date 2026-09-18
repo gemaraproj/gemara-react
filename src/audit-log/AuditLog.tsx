@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type {
   AuditLog as AuditLogData,
   MultiEntryMapping,
@@ -50,9 +51,6 @@ type TargetResource = Schemas["Resource"] & {
  * audit's criteria/evidence reference-ids point into), but the generator
  * drops it from the emitted Metadata schema. Widen locally.
  */
-type AuditMetadata = AuditLogData["metadata"] & {
-  "mapping-references"?: Schemas["MappingReference"][];
-};
 
 /**
  * `Recommendation.required` is `*false | bool` in CUE but the OpenAPI
@@ -101,7 +99,7 @@ interface PartProps {
 }
 
 function Header({ data }: PartProps) {
-  const metadata: AuditMetadata = data.metadata;
+  const { metadata } = data;
   return (
     <header data-gemara-part="header">
       {/* Logs carry no `title` field; the artifact-type label keeps the
@@ -160,6 +158,10 @@ function Header({ data }: PartProps) {
               <ArtifactRef
                 kind="artifact"
                 id={metadata.lexicon["reference-id"] ?? ""}
+                url={mappingReferenceUrl(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
                 relation="lexicon"
               />
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
@@ -313,6 +315,10 @@ function Criteria({ data }: PartProps) {
             <ArtifactRef
               kind="artifact"
               id={c["reference-id"] ?? ""}
+              url={mappingReferenceUrl(
+                data.metadata["mapping-references"],
+                c["reference-id"],
+              )}
               relation="criteria"
             />
             {c.remarks ? <> — {c.remarks}</> : null}
@@ -519,7 +525,7 @@ function Mappings({ label, mappings }: MappingsProps) {
 }
 
 function MappingReferences({ data }: PartProps) {
-  const metadata: AuditMetadata = data.metadata;
+  const { metadata } = data;
   const refs = metadata["mapping-references"] ?? [];
   if (refs.length === 0) return null;
   return (
