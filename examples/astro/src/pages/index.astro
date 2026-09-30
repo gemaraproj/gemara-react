@@ -4,9 +4,11 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { ControlCatalog } from "@gemara/react/control-catalog";
+import { GuidanceCatalog } from "@gemara/react/guidance-catalog";
 import { GemaraProvider } from "@gemara/react/provider";
-import { detectArtifactType, isControlCatalog } from "@gemara/react";
+import { detectArtifactType, isControlCatalog, isGuidanceCatalog } from "@gemara/react";
 import CollapsibleControlGroup from "../components/CollapsibleControlGroup.tsx";
+import CollapsibleGuidanceGroup from "../components/CollapsibleGuidanceGroup.tsx";
 import MultiFormatViewer from "../components/MultiFormatViewer.tsx";
 // The OSCAL projection is produced server-side by go-gemara, never in the
 // browser. Pre-generated with:
@@ -19,6 +21,12 @@ import oscal from "../fixtures/good-ccc.oscal.json?raw";
 // (gemaraconv has no CLI for it, so the fixture was generated with a one-off
 // program and committed.) Same `?raw` import — an opaque string we display.
 import markdown from "../fixtures/good-ccc.md?raw";
+// GuidanceCatalog exports as an OSCAL Catalog + Profile pair:
+//   go run ./cmd/oscalexport guidance ../gemara/test/test-data/good-aigf.yaml \
+//      -catalog-output good-aigf.oscal.json -profile-output good-aigf.oscal-profile.json
+// There is no Markdown projection for guidance in gemaraconv yet.
+import aigfOscal from "../fixtures/good-aigf.oscal.json?raw";
+import aigfProfile from "../fixtures/good-aigf.oscal-profile.json?raw";
 
 // Load fixtures from the canonical gemara repo at build time. In a real app
 // these would come from the hub API or a content collection.
@@ -40,9 +48,15 @@ if (!isControlCatalog(ccc.parsed)) {
 const data = ccc.parsed;
 const firstGroupId = data.groups?.[0]?.id ?? "";
 
+const aigf = loadFixture("good-aigf.yaml");
+if (!isGuidanceCatalog(aigf.parsed)) {
+  throw new Error("Expected GuidanceCatalog at " + aigf.name);
+}
+const guidance = aigf.parsed;
+const firstGuidanceGroupId = guidance.groups?.[0]?.id ?? "";
+
 // One fixture per remaining artifact type: Preview + raw YAML for each.
 const others = [
-  "good-aigf.yaml",
   "good-aigf-principles.yaml",
   "good-aigf-vectors.yaml",
   "good-risk-catalog.yaml",
@@ -93,6 +107,41 @@ const others = [
       yaml={ccc.raw}
       markdown={markdown}
       oscal={oscal}
+    />
+
+    <hr />
+
+    <h1>gemara-react: GuidanceCatalog (server-rendered)</h1>
+    <GemaraProvider>
+      <GuidanceCatalog data={guidance} headingLevel={2} />
+    </GemaraProvider>
+
+    <hr />
+
+    <h2>Interactive island (client:idle)</h2>
+    {firstGuidanceGroupId && (
+      <CollapsibleGuidanceGroup
+        client:idle
+        data={guidance}
+        groupId={firstGuidanceGroupId}
+      />
+    )}
+
+    <hr />
+
+    <h2>Multi-format viewer (client:idle)</h2>
+    <p>
+      Preview + raw YAML + OSCAL Catalog and Profile (the pair
+      <code>oscalexport guidance</code> emits). No Markdown tab: gemaraconv has
+      no guidance Markdown projection yet.
+    </p>
+    <MultiFormatViewer
+      client:idle
+      type={aigf.type}
+      data={guidance}
+      yaml={aigf.raw}
+      oscal={aigfOscal}
+      oscalProfile={aigfProfile}
     />
 
     <hr />

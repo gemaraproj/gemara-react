@@ -1,0 +1,314 @@
+{
+  "catalog": {
+    "back-matter": {
+      "resources": [
+        {
+          "citation": {
+            "text": "*AI Governance Framework Principles*. https://aigf.finos.org/principles"
+          },
+          "description": "Core principles underpinning the FINOS AI Governance Framework",
+          "props": [
+            {
+              "name": "id",
+              "ns": "https://github.com/gemaraproj/go-gemara/ns/oscal",
+              "value": "AIR-PRIN"
+            }
+          ],
+          "rlinks": [
+            {
+              "href": "https://aigf.finos.org/principles"
+            }
+          ],
+          "title": "AI Governance Framework Principles",
+          "uuid": "c529894b-520a-4251-8e88-55e6bb3cd4c3"
+        },
+        {
+          "citation": {
+            "text": "*AI Governance Framework Risk Vectors*. https://aigf.finos.org/risks"
+          },
+          "description": "AIGF risks expressed as Gemara vectors",
+          "props": [
+            {
+              "name": "id",
+              "ns": "https://github.com/gemaraproj/go-gemara/ns/oscal",
+              "value": "AIR-VEC"
+            }
+          ],
+          "rlinks": [
+            {
+              "href": "https://aigf.finos.org/risks"
+            }
+          ],
+          "title": "AI Governance Framework Risk Vectors",
+          "uuid": "0d03c42f-2588-47ca-9215-6b95655a683f"
+        }
+      ]
+    },
+    "groups": [
+      {
+        "class": "family",
+        "controls": [
+          {
+            "class": "FINOS-AIR",
+            "id": "air-prev-002",
+            "links": [
+              {
+                "href": "#air-det-001",
+                "rel": "related"
+              },
+              {
+                "href": "#air-prev-006",
+                "rel": "related"
+              },
+              {
+                "href": "#air-det-016",
+                "rel": "related"
+              },
+              {
+                "href": "#0d03c42f-2588-47ca-9215-6b95655a683f",
+                "rel": "reference"
+              },
+              {
+                "href": "#c529894b-520a-4251-8e88-55e6bb3cd4c3",
+                "rel": "reference"
+              }
+            ],
+            "parts": [
+              {
+                "id": "air-prev-002_smt",
+                "name": "statement",
+                "parts": [
+                  {
+                    "id": "air-prev-002_smt.1",
+                    "name": "item",
+                    "prose": "Identify and remove or appropriately anonymize sensitive details to ensure that data fed into the AI system is free from information that could pose a security or privacy risk if inadvertently exposed.",
+                    "title": "Rigorous Data Cleansing and Anonymization at Ingestion"
+                  },
+                  {
+                    "id": "air-prev-002_smt.2",
+                    "name": "item",
+                    "title": "Segregation for Highly Sensitive Data"
+                  },
+                  {
+                    "id": "air-prev-002_smt.3",
+                    "name": "item",
+                    "title": "Filtering AI System Outputs (Secondary Defense)"
+                  },
+                  {
+                    "id": "air-prev-002_smt.4",
+                    "name": "item",
+                    "title": "Integration with Source System Access Controls"
+                  },
+                  {
+                    "id": "air-prev-002_smt.5",
+                    "name": "item",
+                    "prose": "Periodically audit the effectiveness of data filtering processes by sampling processed data and checking for any sensitive information that may have been missed.\n",
+                    "title": "Monitoring and Continuous Improvement"
+                  }
+                ]
+              },
+              {
+                "id": "air-prev-002_obj",
+                "name": "assessment-objective",
+                "parts": [
+                  {
+                    "id": "air-prev-002_obj.1",
+                    "links": [
+                      {
+                        "href": "#air-prev-002_smt.1",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "Pre-Processing Review and Cleansing: Before any information from internal knowledge sources is ingested by an AI system, it must undergo a thorough review and cleansing process to identify and remove or appropriately anonymize sensitive details.\n Categories of Data to Target for Filtering: Personally Identifiable Information (PII), Proprietary Business Information, Sensitive Internal Operational Data, Confidential Customer Data, and Regulatory or Compliance-Sensitive Information.\n Filtering and Anonymization Methods: Data Masking, Redaction, Generalization, Tokenization, and Synthetic Data Generation.\n"
+                  },
+                  {
+                    "id": "air-prev-002_obj.2",
+                    "links": [
+                      {
+                        "href": "#air-prev-002_smt.2",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "Isolated AI Systems for Critical Data: For datasets containing exceptionally sensitive information that cannot be adequately protected through standard cleansing, implement separate, isolated AI systems with stricter access controls, enhanced encryption, and limited network connectivity.\n Access Domain-Based Segregation: Segment data and AI system access based on clearly defined access domains that mirror the organization's existing data classification and access control structures.\n"
+                  },
+                  {
+                    "id": "air-prev-002_obj.3",
+                    "links": [
+                      {
+                        "href": "#air-prev-002_smt.3",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "Response Filtering and Validation: Responses generated by the AI system should be monitored and filtered before being presented to users, acting as a safety net to detect sensitive data that might have bypassed initial input cleansing.\n Contextual Output Analysis: Implement intelligent filtering that considers the context of the user's query and their authorization level to determine what information should be included in the response.\n"
+                  },
+                  {
+                    "id": "air-prev-002_obj.4",
+                    "links": [
+                      {
+                        "href": "#air-prev-002_smt.4",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "Respect Original Permissions: Design the AI system to respect and replicate the original access control permissions from source systems. Dynamic Source Querying: For real-time RAG systems, consider querying source systems dynamically while respecting user permissions, rather than pre-processing all data indiscriminately."
+                  },
+                  {
+                    "id": "air-prev-002_obj.5",
+                    "links": [
+                      {
+                        "href": "#air-prev-002_smt.5",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "Regular Review of Filtering Effectiveness: Periodically audit the effectiveness of data filtering processes by sampling processed data. Feedback Loop Integration: Establish mechanisms for users and reviewers to report instances where sensitive information may have been inappropriately exposed. Threat Intelligence Integration: Stay informed about new types of data leakage vectors and attack techniques that might affect AI systems."
+                  }
+                ]
+              },
+              {
+                "id": "air-prev-002_ovw",
+                "name": "overview",
+                "prose": "This control addresses the critical need to sanitize, filter, and appropriately  manage sensitive information when AI systems ingest data from internal knowledge  sources such as wikis, document management systems, databases, or collaboration  platforms (e.g., Confluence, SharePoint, internal websites). The primary objective  is to prevent the inadvertent exposure, leakage, or manipulation of confidential  organizational knowledge when this data is processed by AI models, converted into  embeddings for vector databases, or used in Retrieval Augmented Generation (RAG) systems. Given that many AI applications, particularly RAG systems, rely on internal knowledge bases to  provide contextually relevant and organization-specific responses, ensuring that sensitive  information within these sources is appropriately handled is paramount for maintaining  data confidentiality and preventing unauthorized access.\n"
+              }
+            ],
+            "title": "Data Filtering From External Knowledge Bases"
+          },
+          {
+            "class": "FINOS-AIR",
+            "id": "air-prev-003",
+            "links": [
+              {
+                "href": "#air-prev-017",
+                "rel": "related"
+              },
+              {
+                "href": "#air-prev-008",
+                "rel": "related"
+              },
+              {
+                "href": "#air-det-015",
+                "rel": "related"
+              },
+              {
+                "href": "#0d03c42f-2588-47ca-9215-6b95655a683f",
+                "rel": "reference"
+              },
+              {
+                "href": "#c529894b-520a-4251-8e88-55e6bb3cd4c3",
+                "rel": "reference"
+              }
+            ],
+            "parts": [
+              {
+                "id": "air-prev-003_smt",
+                "name": "statement",
+                "parts": [
+                  {
+                    "id": "air-prev-003_smt.1",
+                    "name": "item",
+                    "title": "RAG Data Ingestion Filtering"
+                  },
+                  {
+                    "id": "air-prev-003_smt.2",
+                    "name": "item",
+                    "title": "Remediation Techniques"
+                  },
+                  {
+                    "id": "air-prev-003_smt.3",
+                    "name": "item",
+                    "title": "Additional Considerations"
+                  },
+                  {
+                    "id": "air-prev-003_smt.4",
+                    "name": "item",
+                    "prose": "RAG Database Security: Vector databases make traditional security filtering difficult once data is embedded. Filtering Efficacy: Static filters may miss nuanced attacks or sophisticated content. Streaming Outputs: Real-time filtering creates trade-offs between security and user experience.\n",
+                    "title": "Challenges and Considerations"
+                  }
+                ]
+              },
+              {
+                "id": "air-prev-003_obj",
+                "name": "assessment-objective",
+                "parts": [
+                  {
+                    "id": "air-prev-003_obj.1",
+                    "links": [
+                      {
+                        "href": "#air-prev-003_smt.1",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "RAG Database Security: While it's often more practical to pre-process and filter data for RAG systems before sending it for external embedding creation, organizations might also consider in-line filters for real-time checks. Once internal information is converted into embeddings and stored in vector databases, the data becomes largely opaque to traditional security tools.\n Filtering Efficacy: Static filters based on regular expressions or keyword blocklists are effective for well-defined patterns but less effective at identifying nuanced issues such as generic private information or subtle Prompt Injection attacks.\n Streaming Outputs: Streaming responses improve user experience but implementing output filtering can be challenging. An approach is to stream while performing on-the-fly detection, cancelling output if an issue is found.\n"
+                  },
+                  {
+                    "id": "air-prev-003_obj.2",
+                    "links": [
+                      {
+                        "href": "#air-prev-003_smt.2",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "Basic Filters: Simple static checks using blocklists and regular expressions can detect rudimentary attacks or policy violations.\n System Prompts (Caution Advised): While system prompts can instruct an LLM on what to avoid, they are generally not a robust security control. Attackers can often bypass these instructions.\n LLM as a Judge: A secondary, specialized LLM analyzes user queries and the primary LLM's responses, categorizing inputs/outputs for various risks such as prompt injection, abuse, hate speech, and data leakage.\n Human Feedback Loop: Implementing a system where users can easily report problematic AI responses provides a valuable complementary control.\n"
+                  },
+                  {
+                    "id": "air-prev-003_obj.3",
+                    "links": [
+                      {
+                        "href": "#air-prev-003_smt.3",
+                        "rel": "assessment-for"
+                      }
+                    ],
+                    "name": "assessment-objective",
+                    "prose": "API Security and Observability: Implementing a comprehensive API monitoring and security solution offers benefits beyond AI-specific threats. A security proxy can enforce encrypted communication between all AI system components.\n Logging and Analysis: Detailed logging of interactions is essential for understanding user behavior, system performance, and detection of sophisticated attacks or anomalies.\n"
+                  }
+                ]
+              },
+              {
+                "id": "air-prev-003_ovw",
+                "name": "overview",
+                "prose": "User/App/Model Firewalling encompasses the set of security controls applied at the boundaries between users, applications, AI models, and supporting data stores such as RAG databases. When internal company information is used to enrich a RAG database, especially if this involves processing by external services, this data and the external communication pathways must be carefully managed and secured. Any proprietary or sensitive information sent to an external service for such processing requires rigorous filtering before transmission to prevent data leakage.\n"
+              }
+            ],
+            "title": "User/App/Model Firewalling"
+          }
+        ],
+        "id": "PREV",
+        "title": "Preventive"
+      }
+    ],
+    "metadata": {
+      "last-modified": "2026-09-29T22:46:58.537124-05:00",
+      "oscal-version": "1.1.3",
+      "parties": [
+        {
+          "name": "FINOS",
+          "type": "person",
+          "uuid": "9617cd64-c2b9-49d4-a48c-463ce2dcc607"
+        }
+      ],
+      "responsible-parties": [
+        {
+          "party-uuids": [
+            "9617cd64-c2b9-49d4-a48c-463ce2dcc607"
+          ],
+          "role-id": "author"
+        }
+      ],
+      "roles": [
+        {
+          "description": "Author and owner of the document",
+          "id": "author",
+          "title": "Author"
+        }
+      ],
+      "title": "AI Governance Framework",
+      "version": "0.1.0"
+    },
+    "uuid": "f5949198-d38c-46a5-8081-be9575749d4a"
+  }
+}
