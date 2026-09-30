@@ -5,8 +5,10 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
-import { DocumentReferences } from "../primitives/DocumentReferences.js";
+import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { ControlCatalog as ControlCatalogData } from "../generated/types.js";
+
+type MappingReference = NonNullable<ControlCatalogData["metadata"]["mapping-references"]>[number];
 
 /**
  * Headless ControlCatalog renderer.
@@ -120,11 +122,12 @@ interface GroupsProps {
 function Groups({ data }: GroupsProps) {
   const groups = data.groups ?? [];
   const controls = data.controls ?? [];
+  const refs = data.metadata["mapping-references"];
 
   if (groups.length === 0) {
     return (
       <section data-gemara-part="groups">
-        <ControlList controls={controls} />
+        <ControlList controls={controls} refs={refs} />
       </section>
     );
   }
@@ -147,6 +150,7 @@ function Groups({ data }: GroupsProps) {
           key={g.id}
           group={g}
           controls={buckets.get(g.id ?? "") ?? []}
+          refs={refs}
         />
       ))}
       {ungrouped.length > 0 ? (
@@ -157,6 +161,7 @@ function Groups({ data }: GroupsProps) {
             description: "Controls not assigned to a declared group.",
           }}
           controls={ungrouped}
+          refs={refs}
         />
       ) : null}
     </section>
@@ -166,23 +171,25 @@ function Groups({ data }: GroupsProps) {
 interface GroupViewProps {
   group: Group;
   controls: Control[];
+  refs?: MappingReference[];
 }
 
-function GroupView({ group, controls }: GroupViewProps) {
+function GroupView({ group, controls, refs }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
       <Heading offset={1}>{group.title}</Heading>
       {group.description ? <Prose content={group.description} as="p" /> : null}
-      <ControlList controls={controls} />
+      <ControlList controls={controls} refs={refs} />
     </section>
   );
 }
 
 interface ControlListProps {
   controls: Control[];
+  refs?: MappingReference[];
 }
 
-function ControlList({ controls }: ControlListProps) {
+function ControlList({ controls, refs }: ControlListProps) {
   if (controls.length === 0) {
     return <p data-gemara-empty="controls">No controls in this group.</p>;
   }
@@ -190,7 +197,7 @@ function ControlList({ controls }: ControlListProps) {
     <ol data-gemara-part="control-list">
       {controls.map((c) => (
         <li key={c.id}>
-          <ControlView control={c} />
+          <ControlView control={c} refs={refs} />
         </li>
       ))}
     </ol>
@@ -199,9 +206,10 @@ function ControlList({ controls }: ControlListProps) {
 
 interface ControlViewProps {
   control: Control;
+  refs?: MappingReference[];
 }
 
-function ControlView({ control }: ControlViewProps) {
+function ControlView({ control, refs }: ControlViewProps) {
   return (
     <article
       data-gemara-part="control"
@@ -232,10 +240,10 @@ function ControlView({ control }: ControlViewProps) {
       (control.threats && control.threats.length > 0) ? (
         <References>
           {control.guidelines && control.guidelines.length > 0 ? (
-            <Mappings label="Guidelines" mappings={control.guidelines} />
+            <Mappings label="Guidelines" mappings={control.guidelines} refs={refs} />
           ) : null}
           {control.threats && control.threats.length > 0 ? (
-            <Mappings label="Threats" mappings={control.threats} />
+            <Mappings label="Threats" mappings={control.threats} refs={refs} />
           ) : null}
         </References>
       ) : null}
@@ -285,9 +293,10 @@ function References({ children }: { children: ReactNode }) {
 interface MappingsProps {
   label: string;
   mappings: MultiEntryMapping[];
+  refs?: MappingReference[];
 }
 
-function Mappings({ label, mappings }: MappingsProps) {
+function Mappings({ label, mappings, refs }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
       <Heading offset={3}>{label}</Heading>
@@ -308,6 +317,7 @@ function Mappings({ label, mappings }: MappingsProps) {
                         kind="entry"
                         id={entryId ?? ""}
                         referenceId={m["reference-id"]}
+                        url={mappingReferenceUrl(refs, m["reference-id"])}
                         relation={label.toLowerCase()}
                       >
                         {entryId}

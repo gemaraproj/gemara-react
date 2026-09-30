@@ -92,22 +92,26 @@ export function DocumentReferences({ data }: DocumentReferencesProps) {
               />
               {imp.remarks ? <> — {imp.remarks}</> : null}
               {imp.entries && imp.entries.length > 0 ? (
-                <ul>
-                  {imp.entries.map((entry, j) => (
-                    <li
-                      key={`${entry["entry-id"] ?? "entry"}-${j}`}
-                      data-gemara-entry-id={entry["entry-id"] ?? ""}
-                    >
-                      <ArtifactRef
-                        kind="entry"
-                        id={entry["entry-id"] ?? ""}
-                        referenceId={imp["reference-id"]}
-                        url={mappingReferenceUrl(refs, imp["reference-id"])}
-                        relation="imports"
-                      />
-                      {entry.remarks ? <> — {entry.remarks}</> : null}
-                    </li>
-                  ))}
+                <ul data-gemara-part="import-entries">
+                  {imp.entries.map((entry, j) => {
+                    const entryId = entry["entry-id"] ?? entry["reference-id"];
+                    return (
+                      <li
+                        key={`${entryId ?? "entry"}-${j}`}
+                        data-gemara-part="import-entry"
+                        data-gemara-entry-id={entryId ?? ""}
+                      >
+                        <ArtifactRef
+                          kind="entry"
+                          id={entryId ?? ""}
+                          referenceId={imp["reference-id"]}
+                          url={mappingReferenceUrl(refs, imp["reference-id"])}
+                          relation="imports"
+                        />
+                        {entry.remarks ? <> — {entry.remarks}</> : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : null}
             </li>

@@ -47,12 +47,6 @@ type TargetResource = Schemas["Resource"] & {
 };
 
 /**
- * `#Metadata` declares optional `mapping-references` (the bibliography the
- * audit's criteria/evidence reference-ids point into), but the generator
- * drops it from the emitted Metadata schema. Widen locally.
- */
-
-/**
  * `Recommendation.required` is `*false | bool` in CUE but the OpenAPI
  * generator emits it as `string`; loaded YAML carries a real boolean. Accept
  * both without trusting either.

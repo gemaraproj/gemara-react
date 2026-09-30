@@ -5,8 +5,10 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
-import { DocumentReferences } from "../primitives/DocumentReferences.js";
+import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { ThreatCatalog as ThreatCatalogData } from "../generated/types.js";
+
+type MappingReference = NonNullable<ThreatCatalogData["metadata"]["mapping-references"]>[number];
 
 /**
  * Headless ThreatCatalog renderer (Gemara Layer 2).
@@ -118,11 +120,12 @@ interface GroupsProps {
 function Groups({ data }: GroupsProps) {
   const groups = data.groups ?? [];
   const threats = data.threats ?? [];
+  const refs = data.metadata["mapping-references"];
 
   if (groups.length === 0) {
     return (
       <section data-gemara-part="groups">
-        <ThreatList threats={threats} />
+        <ThreatList threats={threats} refs={refs} />
       </section>
     );
   }
@@ -141,7 +144,7 @@ function Groups({ data }: GroupsProps) {
   return (
     <section data-gemara-part="groups">
       {groups.map((g) => (
-        <GroupView key={g.id} group={g} threats={buckets.get(g.id ?? "") ?? []} />
+        <GroupView key={g.id} group={g} threats={buckets.get(g.id ?? "") ?? []} refs={refs} />
       ))}
       {ungrouped.length > 0 ? (
         <GroupView
@@ -151,6 +154,7 @@ function Groups({ data }: GroupsProps) {
             description: "Threats not assigned to a declared group.",
           }}
           threats={ungrouped}
+          refs={refs}
         />
       ) : null}
     </section>
@@ -160,23 +164,25 @@ function Groups({ data }: GroupsProps) {
 interface GroupViewProps {
   group: Group;
   threats: Threat[];
+  refs?: MappingReference[];
 }
 
-function GroupView({ group, threats }: GroupViewProps) {
+function GroupView({ group, threats, refs }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
       <Heading offset={1}>{group.title}</Heading>
       {group.description ? <Prose content={group.description} as="p" /> : null}
-      <ThreatList threats={threats} />
+      <ThreatList threats={threats} refs={refs} />
     </section>
   );
 }
 
 interface ThreatListProps {
   threats: Threat[];
+  refs?: MappingReference[];
 }
 
-function ThreatList({ threats }: ThreatListProps) {
+function ThreatList({ threats, refs }: ThreatListProps) {
   if (threats.length === 0) {
     return <p data-gemara-empty="threats">No threats in this group.</p>;
   }
@@ -184,7 +190,7 @@ function ThreatList({ threats }: ThreatListProps) {
     <ol data-gemara-part="threat-list">
       {threats.map((t) => (
         <li key={t.id}>
-          <ThreatView threat={t} />
+          <ThreatView threat={t} refs={refs} />
         </li>
       ))}
     </ol>
@@ -193,9 +199,10 @@ function ThreatList({ threats }: ThreatListProps) {
 
 interface ThreatViewProps {
   threat: Threat;
+  refs?: MappingReference[];
 }
 
-function ThreatView({ threat }: ThreatViewProps) {
+function ThreatView({ threat, refs }: ThreatViewProps) {
   return (
     <article
       data-gemara-part="threat"
@@ -225,10 +232,10 @@ function ThreatView({ threat }: ThreatViewProps) {
       (threat.vectors && threat.vectors.length > 0) ? (
         <References>
           {threat.capabilities && threat.capabilities.length > 0 ? (
-            <Mappings label="Capabilities" mappings={threat.capabilities} />
+            <Mappings label="Capabilities" mappings={threat.capabilities} refs={refs} />
           ) : null}
           {threat.vectors && threat.vectors.length > 0 ? (
-            <Mappings label="Vectors" mappings={threat.vectors} />
+            <Mappings label="Vectors" mappings={threat.vectors} refs={refs} />
           ) : null}
         </References>
       ) : null}
@@ -269,9 +276,10 @@ function References({ children }: { children: ReactNode }) {
 interface MappingsProps {
   label: string;
   mappings: MultiEntryMapping[];
+  refs?: MappingReference[];
 }
 
-function Mappings({ label, mappings }: MappingsProps) {
+function Mappings({ label, mappings, refs }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
       <Heading offset={3}>{label}</Heading>
@@ -292,6 +300,7 @@ function Mappings({ label, mappings }: MappingsProps) {
                         kind="entry"
                         id={entryId ?? ""}
                         referenceId={m["reference-id"]}
+                        url={mappingReferenceUrl(refs, m["reference-id"])}
                         relation={label.toLowerCase()}
                       >
                         {entryId}
