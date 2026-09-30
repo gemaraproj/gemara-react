@@ -114,6 +114,36 @@ describe("GuidanceCatalog", () => {
     }
   });
 
+  it("renders guideline-level applicability and recommendations", () => {
+    const withGuideline: GuidanceCatalogData = {
+      ...data,
+      guidelines: [
+        {
+          ...(data.guidelines ?? [])[0]!,
+          id: "G-1",
+          statements: undefined,
+          applicability: ["production", "staging"],
+          recommendations: ["Do the thing."],
+        },
+      ],
+    };
+    const { container } = render(<GuidanceCatalog data={withGuideline} />);
+    const g = container.querySelector("[data-gemara-guideline-id='G-1']");
+    expect(g?.querySelector("[data-gemara-part='applicability']")?.textContent).toBe(
+      "Applicability: production, staging",
+    );
+    expect(g?.querySelectorAll("[data-gemara-part='recommendation']").length).toBe(1);
+    expect(g?.querySelector("[data-gemara-part='recommendations'] h4")).not.toBeNull();
+  });
+
+  it("nests statement recommendations one level below the statement heading", () => {
+    const { container } = render(<GuidanceCatalog data={data} />);
+    const st = container.querySelector("[data-gemara-part='statement'] [data-gemara-part='recommendations']");
+    expect(st).not.toBeNull();
+    expect(st?.querySelector("h6")).not.toBeNull();
+    expect(container.querySelector("[data-gemara-part='statement'] > h5")).not.toBeNull();
+  });
+
   it("renders catalog-level exemptions with redirect mappings", () => {
     const withExemptions: GuidanceCatalogData = {
       ...data,
@@ -133,6 +163,7 @@ describe("GuidanceCatalog", () => {
     expect(
       section?.querySelector("[data-gemara-mappings-label='redirect'] [data-gemara-ref-id='AIR-PREV-001']"),
     ).not.toBeNull();
+    expect(section?.querySelector("[data-gemara-mappings-label='redirect'] h3")).not.toBeNull();
     // Fixture has none, so the default composition emits no section.
     expect(
       render(<GuidanceCatalog data={data} />).container.querySelector("[data-gemara-part='exemptions']"),
@@ -215,7 +246,6 @@ describe("GuidanceCatalog", () => {
 
   it("clamps heading level at h6", () => {
     const { container } = render(<GuidanceCatalog data={data} headingLevel={5} />);
-    expect(container.querySelectorAll("h6").length).toBeGreaterThan(0);
-    expect(container.querySelector("h7")).toBeNull();
+    expect(container.querySelector("[data-gemara-part='statement'] h6")).not.toBeNull();
   });
 });

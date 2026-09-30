@@ -96,7 +96,7 @@ These attributes are stable across patch releases. Treat them like a CSS API.
 
 ## Composing into your page outline: `headingLevel`
 
-Every artifact renderer accepts an optional `headingLevel` prop (default `1`) that sets the level of the artifact title. Nested sections add fixed offsets (group/section = +1, entry = +2, subsections = +3) and are clamped at `<h6>`. Log renderers without a schema `title` field (e.g. `EnforcementLog`) still honor `headingLevel` for their section headings — the host page owns the document heading.
+Every artifact renderer accepts an optional `headingLevel` prop (default `1`) that sets the level of the artifact title. Nested sections add fixed offsets (group/section = +1, entry = +2, subsections = +3; GuidanceCatalog statements = +4 with their own subsections at +5) and are clamped at `<h6>`. Log renderers without a schema `title` field (e.g. `EnforcementLog`) still honor `headingLevel` for their section headings — the host page owns the document heading.
 
 Set `headingLevel={2}` when the host page already owns the `<h1>`.
 
@@ -121,6 +121,8 @@ import { GemaraProvider } from "@gemara/react/provider";
 ```
 
 The resolver receives an `ArtifactReference` (`kind: "artifact" | "entry" | "mapping-reference"`, plus `id`, optional `referenceId`, `url`, `relation`).
+
+GuidanceCatalog `see-also` refs arrive with `kind="entry"`, `relation="see-also"` and no `url`: the spec says their targets are guidelines in the same catalog, but the library cannot know whether that guideline is on the current page (DIY composition may render a subset). Each rendered guideline carries `id="guideline-<id>"`, so a full-page consumer can resolve them with `href={`#guideline-${ref.id}`}` when `ref.relation === "see-also"`; the default resolver leaves them as inert `<span>`s.
 
 ## Prose fields are plain text
 

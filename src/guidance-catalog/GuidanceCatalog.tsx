@@ -20,7 +20,8 @@ export interface GuidanceCatalogProps {
   data: GuidanceCatalogData;
   /**
    * Heading level (1-6) used for the catalog title. Nested sections add fixed
-   * offsets: group = +1, guideline = +2, guideline subsection labels = +3.
+   * offsets: group = +1, guideline = +2, guideline subsection labels = +3,
+   * statement = +4, statement subsection labels = +5.
    * Defaults to 1. Set to 2 (or higher) when composing into a host page that
    * already owns the `<h1>`.
    */
@@ -303,7 +304,7 @@ function GuidelineView({ guideline, refs }: GuidelineViewProps) {
 
 interface RecommendationsProps {
   recommendations: string[];
-  /** Heading offset: 3 under a guideline, 4 under a statement. */
+  /** Heading offset: 3 under a guideline, 5 under a statement. */
   offset: number;
 }
 
@@ -348,7 +349,7 @@ function StatementList({ statements }: StatementListProps) {
             </Heading>
             {st.text ? <Prose content={st.text} as="p" /> : null}
             {st.recommendations && st.recommendations.length > 0 ? (
-              <Recommendations recommendations={st.recommendations} offset={4} />
+              <Recommendations recommendations={st.recommendations} offset={5} />
             ) : null}
           </li>
         ))}
@@ -373,7 +374,9 @@ function Exemptions({ exemptions, refs }: ExemptionsProps) {
             {x.reason ? (
               <p data-gemara-part="exemption-reason">Reason: {x.reason}</p>
             ) : null}
-            {x.redirect ? <Mappings label="Redirect" mappings={[x.redirect]} refs={refs} /> : null}
+            {x.redirect ? (
+              <Mappings label="Redirect" mappings={[x.redirect]} refs={refs} offset={2} />
+            ) : null}
           </li>
         ))}
       </ul>
@@ -396,12 +399,14 @@ interface MappingsProps {
   label: string;
   mappings: MultiEntryMapping[];
   refs?: MappingReference[];
+  /** Heading offset: 3 under a guideline (default), 2 under an exemption. */
+  offset?: number;
 }
 
-function Mappings({ label, mappings, refs }: MappingsProps) {
+function Mappings({ label, mappings, refs, offset = 3 }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
-      <Heading offset={3}>{label}</Heading>
+      <Heading offset={offset}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
           <li key={`${m["reference-id"] ?? "ref"}-${i}`}>
