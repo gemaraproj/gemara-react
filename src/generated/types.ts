@@ -923,6 +923,15 @@ export const ARTIFACT_TYPES = [
 export type Schemas = components["schemas"];
 
 /**
+ * `#Metadata` declares `mapping-references` under a CUE field alias
+ * (`MR="mapping-references"`) that the OpenAPI generator drops. Restore it
+ * once here so every narrowed alias below carries it.
+ */
+export type Metadata = Schemas["Metadata"] & {
+  "mapping-references"?: Schemas["MappingReference"][];
+};
+
+/**
  * EntryMapping override.
  *
  * The upstream openapi.yaml currently inlines a partial `ArtifactMapping` for
@@ -950,9 +959,11 @@ export interface MultiEntryMapping {
 
 /** A loaded ControlCatalog with the discriminator narrowed to the literal. */
 export type ControlCatalog = Omit<Schemas["ControlCatalog"], "metadata" | "controls"> & {
-  metadata: Schemas["Metadata"] & { type: "ControlCatalog" };
+  metadata: Metadata & { type: "ControlCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
   controls?: Array<
     Omit<NonNullable<Schemas["ControlCatalog"]["controls"]>[number], "guidelines" | "threats"> & {
       guidelines?: MultiEntryMapping[];
@@ -963,9 +974,11 @@ export type ControlCatalog = Omit<Schemas["ControlCatalog"], "metadata" | "contr
 
 /** A loaded GuidanceCatalog with the discriminator narrowed to the literal. */
 export type GuidanceCatalog = Omit<Schemas["GuidanceCatalog"], "metadata" | "guidelines"> & {
-  metadata: Schemas["Metadata"] & { type: "GuidanceCatalog" };
+  metadata: Metadata & { type: "GuidanceCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
   guidelines?: Array<
     Omit<NonNullable<Schemas["GuidanceCatalog"]["guidelines"]>[number], "principles"> & {
       principles?: MultiEntryMapping[];
@@ -981,23 +994,29 @@ export type GuidanceCatalog = Omit<Schemas["GuidanceCatalog"], "metadata" | "gui
  * carry no mappings, so the entry shape needs no further narrowing.
  */
 export type PrincipleCatalog = Omit<Schemas["PrincipleCatalog"], "metadata"> & {
-  metadata: Schemas["Metadata"] & { type: "PrincipleCatalog" };
+  metadata: Metadata & { type: "PrincipleCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
 };
 
 /** A loaded VectorCatalog with the discriminator narrowed to the literal. */
 export type VectorCatalog = Omit<Schemas["VectorCatalog"], "metadata"> & {
-  metadata: Schemas["Metadata"] & { type: "VectorCatalog" };
+  metadata: Metadata & { type: "VectorCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
 };
 
 /** A loaded CapabilityCatalog with the discriminator narrowed to the literal. */
 export type CapabilityCatalog = Omit<Schemas["CapabilityCatalog"], "metadata"> & {
-  metadata: Schemas["Metadata"] & { type: "CapabilityCatalog" };
+  metadata: Metadata & { type: "CapabilityCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
 };
 
 /**
@@ -1009,9 +1028,11 @@ export type CapabilityCatalog = Omit<Schemas["CapabilityCatalog"], "metadata"> &
  * Entity fields so EntityRef can render them.
  */
 export type ThreatCatalog = Omit<Schemas["ThreatCatalog"], "metadata" | "threats"> & {
-  metadata: Schemas["Metadata"] & { type: "ThreatCatalog" };
+  metadata: Metadata & { type: "ThreatCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
   threats?: Array<
     Omit<
       NonNullable<Schemas["ThreatCatalog"]["threats"]>[number],
@@ -1034,9 +1055,11 @@ export type ThreatCatalog = Omit<Schemas["ThreatCatalog"], "metadata" | "threats
  * restoration as Control/Guidance/Threat.
  */
 export type RiskCatalog = Omit<Schemas["RiskCatalog"], "metadata" | "groups" | "risks"> & {
-  metadata: Schemas["Metadata"] & { type: "RiskCatalog" };
+  metadata: Metadata & { type: "RiskCatalog" };
   groups?: Array<Schemas["Group"] & Schemas["RiskCategory"]>;
   title?: string;
+  extends?: Schemas["ArtifactMapping"][];
+  imports?: MultiEntryMapping[];
   risks?: Array<
     Omit<NonNullable<Schemas["RiskCatalog"]["risks"]>[number], "threats"> & {
       threats?: MultiEntryMapping[];
@@ -1053,7 +1076,7 @@ export type RiskCatalog = Omit<Schemas["RiskCatalog"], "metadata" | "groups" | "
  * restore the `AcceptedMethod` shape.
  */
 export type Policy = Omit<Schemas["Policy"], "metadata" | "adherence"> & {
-  metadata: Schemas["Metadata"] & { type: "Policy" };
+  metadata: Metadata & { type: "Policy" };
   adherence: Omit<
     Schemas["Adherence"],
     "evaluation-methods" | "enforcement-methods" | "assessment-plans"
@@ -1075,7 +1098,7 @@ export type Policy = Omit<Schemas["Policy"], "metadata" | "adherence"> & {
  * as a required field; real documents never carry it, so it is omitted.
  */
 export type Lexicon = Omit<Schemas["Lexicon"], "metadata" | "_uniqueTermIds"> & {
-  metadata: Schemas["Metadata"] & { type: "Lexicon" };
+  metadata: Metadata & { type: "Lexicon" };
 };
 
 /**
@@ -1091,7 +1114,7 @@ export type MappingDocument = Omit<
   Schemas["MappingDocument"],
   "metadata" | "mappings" | "_uniqueMappingIds"
 > & {
-  metadata: Schemas["Metadata"] & {
+  metadata: Metadata & {
     type: "MappingDocument";
     "mapping-references": Schemas["MappingReference"][];
   };
@@ -1107,7 +1130,7 @@ export type MappingDocument = Omit<
  * MultiEntryMapping restoration.
  */
 export type AuditLog = Omit<Schemas["AuditLog"], "metadata" | "results"> & {
-  metadata: Schemas["Metadata"] & { type: "AuditLog" };
+  metadata: Metadata & { type: "AuditLog" };
   target?: Schemas["Resource"];
   results: Array<
     Omit<Schemas["AuditResult"], "criteria-reference"> & {
@@ -1125,7 +1148,7 @@ export type AuditLog = Omit<Schemas["AuditLog"], "metadata" | "results"> & {
  * `#Log` embed (same as AuditLog).
  */
 export type EnforcementLog = Omit<Schemas["EnforcementLog"], "metadata" | "actions"> & {
-  metadata: Schemas["Metadata"] & { type: "EnforcementLog" };
+  metadata: Metadata & { type: "EnforcementLog" };
   target?: Schemas["Resource"];
   actions: Schemas["ActionResult"][];
 };
@@ -1139,7 +1162,7 @@ export type EnforcementLog = Omit<Schemas["EnforcementLog"], "metadata" | "actio
  * the full `AssessmentLog` shape.
  */
 export type EvaluationLog = Omit<Schemas["EvaluationLog"], "metadata" | "evaluations"> & {
-  metadata: Schemas["Metadata"] & { type: "EvaluationLog" };
+  metadata: Metadata & { type: "EvaluationLog" };
   target?: Schemas["Resource"];
   evaluations: Array<
     Omit<Schemas["ControlEvaluation"], "assessment-logs"> & {

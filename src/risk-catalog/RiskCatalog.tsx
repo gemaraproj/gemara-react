@@ -5,7 +5,10 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { RiskCatalog as RiskCatalogData } from "../generated/types.js";
+
+type MappingReference = NonNullable<RiskCatalogData["metadata"]["mapping-references"]>[number];
 
 /**
  * Headless RiskCatalog renderer (Gemara Layer 2).
@@ -122,22 +125,8 @@ function Header({ data }: HeaderProps) {
             <dd data-gemara-part="draft">{metadata.draft ? "Yes" : "No"}</dd>
           </>
         ) : null}
-        {metadata.lexicon ? (
-          <>
-            <dt>Lexicon</dt>
-            <dd data-gemara-part="lexicon">
-              <ArtifactRef
-                kind="artifact"
-                id={metadata.lexicon["reference-id"] ?? ""}
-                relation="lexicon"
-              >
-                {metadata.lexicon["reference-id"]}
-              </ArtifactRef>
-              {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
-            </dd>
-          </>
-        ) : null}
       </dl>
+      <DocumentReferences data={data} />
     </header>
   );
 }
@@ -149,11 +138,12 @@ interface GroupsProps {
 function Groups({ data }: GroupsProps) {
   const groups = data.groups ?? [];
   const risks = data.risks ?? [];
+  const refs = data.metadata["mapping-references"];
 
   if (groups.length === 0) {
     return (
       <section data-gemara-part="groups">
-        <RiskList risks={risks} />
+        <RiskList risks={risks} refs={refs} />
       </section>
     );
   }
@@ -172,7 +162,7 @@ function Groups({ data }: GroupsProps) {
   return (
     <section data-gemara-part="groups">
       {groups.map((g) => (
-        <GroupView key={g.id} group={g} risks={buckets.get(g.id ?? "") ?? []} />
+        <GroupView key={g.id} group={g} risks={buckets.get(g.id ?? "") ?? []} refs={refs} />
       ))}
       {ungrouped.length > 0 ? (
         <GroupView
@@ -183,6 +173,7 @@ function Groups({ data }: GroupsProps) {
             appetite: "",
           }}
           risks={ungrouped}
+          refs={refs}
         />
       ) : null}
     </section>
@@ -192,9 +183,10 @@ function Groups({ data }: GroupsProps) {
 interface GroupViewProps {
   group: Group;
   risks: Risk[];
+  refs?: MappingReference[];
 }
 
-function GroupView({ group, risks }: GroupViewProps) {
+function GroupView({ group, risks, refs }: GroupViewProps) {
   return (
     <section
       data-gemara-part="group"
@@ -219,16 +211,17 @@ function GroupView({ group, risks }: GroupViewProps) {
           ) : null}
         </dl>
       ) : null}
-      <RiskList risks={risks} />
+      <RiskList risks={risks} refs={refs} />
     </section>
   );
 }
 
 interface RiskListProps {
   risks: Risk[];
+  refs?: MappingReference[];
 }
 
-function RiskList({ risks }: RiskListProps) {
+function RiskList({ risks, refs }: RiskListProps) {
   if (risks.length === 0) {
     return <p data-gemara-empty="risks">No risks in this category.</p>;
   }
@@ -236,7 +229,7 @@ function RiskList({ risks }: RiskListProps) {
     <ol data-gemara-part="risk-list">
       {risks.map((r) => (
         <li key={r.id}>
-          <RiskView risk={r} />
+          <RiskView risk={r} refs={refs} />
         </li>
       ))}
     </ol>
@@ -245,9 +238,10 @@ function RiskList({ risks }: RiskListProps) {
 
 interface RiskViewProps {
   risk: Risk;
+  refs?: MappingReference[];
 }
 
-function RiskView({ risk }: RiskViewProps) {
+function RiskView({ risk, refs }: RiskViewProps) {
   return (
     <article
       data-gemara-part="risk"
@@ -287,7 +281,7 @@ function RiskView({ risk }: RiskViewProps) {
       {risk.owner ? <Owner owner={risk.owner} /> : null}
       {risk.threats && risk.threats.length > 0 ? (
         <References>
-          <Mappings label="Threats" mappings={risk.threats} />
+          <Mappings label="Threats" mappings={risk.threats} refs={refs} />
         </References>
       ) : null}
     </article>
@@ -377,9 +371,10 @@ function References({ children }: { children: ReactNode }) {
 interface MappingsProps {
   label: string;
   mappings: MultiEntryMapping[];
+  refs?: MappingReference[];
 }
 
-function Mappings({ label, mappings }: MappingsProps) {
+function Mappings({ label, mappings, refs }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
       <Heading offset={3}>{label}</Heading>
@@ -401,6 +396,7 @@ function Mappings({ label, mappings }: MappingsProps) {
                         kind="entry"
                         id={entryId ?? ""}
                         referenceId={m["reference-id"]}
+                        url={mappingReferenceUrl(refs, m["reference-id"])}
                         relation={label.toLowerCase()}
                       >
                         {entryId}

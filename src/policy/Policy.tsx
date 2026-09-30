@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type {
   Policy as PolicyData,
   SchemaMappingReference,
@@ -58,32 +59,6 @@ type AssessmentPlan = NonNullable<
 type Parameter = NonNullable<AssessmentPlan["parameters"]>[number];
 
 /**
- * `metadata["mapping-references"]` is optional on the CUE `#Metadata` schema
- * (and present in real Policy documents — imports resolve through it), but the
- * OpenAPI generator drops the conditional overlay so the narrowed `Policy`
- * alias doesn't carry it. Widen locally instead of hand-editing the generated
- * types; the intersection only *adds* an optional field, so the cast is safe.
- */
-type MetadataWithMappingReferences = PolicyData["metadata"] & {
-  "mapping-references"?: SchemaMappingReference[];
-};
-
-function mappingReferencesOf(data: PolicyData): SchemaMappingReference[] {
-  return (
-    (data.metadata as MetadataWithMappingReferences)["mapping-references"] ?? []
-  );
-}
-
-/** Resolve a reference-id to the URL declared in metadata mapping-references. */
-function refUrl(
-  refs: SchemaMappingReference[],
-  id: string | undefined,
-): string | undefined {
-  if (!id) return undefined;
-  return refs.find((r) => r.id === id)?.url;
-}
-
-/**
  * `required` is `*false | bool` in CUE but collapses to `string` in the
  * generated OpenAPI types; YAML parsing yields a real boolean. Handle both.
  */
@@ -129,7 +104,7 @@ function PolicyRoot({ data, headingLevel = 1, children }: PolicyProps) {
 
 function Header({ data }: PartProps) {
   const { metadata, title } = data;
-  const refs = mappingReferencesOf(data);
+  const refs = data.metadata["mapping-references"] ?? [];
   return (
     <header data-gemara-part="header">
       {title ? (
@@ -188,7 +163,7 @@ function Header({ data }: PartProps) {
               <ArtifactRef
                 kind="artifact"
                 id={metadata.lexicon["reference-id"] ?? ""}
-                url={refUrl(refs, metadata.lexicon["reference-id"])}
+                url={mappingReferenceUrl(refs, metadata.lexicon["reference-id"])}
                 relation="lexicon"
               >
                 {metadata.lexicon["reference-id"]}
@@ -380,7 +355,7 @@ function ImportsSection({ data }: PartProps) {
   // `imports` is schema-required, but treat its absence like an empty imports
   // block (renders the existing "No imports declared." empty treatment).
   const imports: ImportsData | undefined = data.imports;
-  const refs = mappingReferencesOf(data);
+  const refs = data.metadata["mapping-references"] ?? [];
   const policies = imports?.policies ?? [];
   const catalogs = imports?.catalogs ?? [];
   const guidance = imports?.guidance ?? [];
@@ -431,7 +406,7 @@ function PolicyImportView({ imp, refs }: PolicyImportViewProps) {
       <ArtifactRef
         kind="artifact"
         id={imp["reference-id"] ?? ""}
-        url={refUrl(refs, imp["reference-id"])}
+        url={mappingReferenceUrl(refs, imp["reference-id"])}
         relation="imports"
       />
       {imp.remarks ? <> — {imp.remarks}</> : null}
@@ -452,7 +427,7 @@ function CatalogImportView({ imp, refs }: CatalogImportViewProps) {
         <ArtifactRef
           kind="artifact"
           id={referenceId ?? ""}
-          url={refUrl(refs, referenceId)}
+          url={mappingReferenceUrl(refs, referenceId)}
           relation="imports"
         />
       </Heading>
@@ -479,7 +454,7 @@ function GuidanceImportView({ imp, refs }: GuidanceImportViewProps) {
         <ArtifactRef
           kind="artifact"
           id={referenceId ?? ""}
-          url={refUrl(refs, referenceId)}
+          url={mappingReferenceUrl(refs, referenceId)}
           relation="imports"
         />
       </Heading>

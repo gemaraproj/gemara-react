@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import type { ReactNode } from "react";
 import { ArtifactRef } from "../primitives/ArtifactRef.js";
+import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
@@ -59,16 +60,6 @@ function applicabilityGroupsOf(
     "applicability-groups"?: SchemaGroup[];
   };
   return widened["applicability-groups"] ?? [];
-}
-
-/** Look up a mapping-reference's URL by id so refs resolve to real links. */
-function referenceUrl(
-  data: MappingDocumentData,
-  referenceId: string | undefined,
-): string | undefined {
-  if (!referenceId) return undefined;
-  const refs = data.metadata["mapping-references"] ?? [];
-  return refs.find((r) => r.id === referenceId)?.url;
 }
 
 export interface MappingDocumentProps {
@@ -173,6 +164,7 @@ function Header({ data }: PartProps) {
               <ArtifactRef
                 kind="artifact"
                 id={lexicon["reference-id"] ?? ""}
+                url={mappingReferenceUrl(data.metadata["mapping-references"], lexicon["reference-id"])}
                 relation="lexicon"
               >
                 {lexicon["reference-id"]}
@@ -236,7 +228,7 @@ function DirectionRef({ data, reference, relation }: DirectionRefProps) {
         <ArtifactRef
           kind="mapping-reference"
           id={refId}
-          url={referenceUrl(data, refId)}
+          url={mappingReferenceUrl(data.metadata["mapping-references"], refId)}
           relation={relation}
         >
           {refId}

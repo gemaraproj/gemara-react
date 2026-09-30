@@ -5,7 +5,10 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { GuidanceCatalog as GuidanceCatalogData } from "../generated/types.js";
+
+type MappingReference = NonNullable<GuidanceCatalogData["metadata"]["mapping-references"]>[number];
 
 type Guideline = NonNullable<GuidanceCatalogData["guidelines"]>[number];
 type Group = NonNullable<GuidanceCatalogData["groups"]>[number];
@@ -101,6 +104,7 @@ function Header({ data }: HeaderProps) {
           </>
         ) : null}
       </dl>
+      <DocumentReferences data={data} />
     </header>
   );
 }
@@ -112,11 +116,12 @@ interface GroupsProps {
 function Groups({ data }: GroupsProps) {
   const groups = data.groups ?? [];
   const guidelines = data.guidelines ?? [];
+  const refs = data.metadata["mapping-references"];
 
   if (groups.length === 0) {
     return (
       <section data-gemara-part="groups">
-        <GuidelineList guidelines={guidelines} />
+        <GuidelineList guidelines={guidelines} refs={refs} />
       </section>
     );
   }
@@ -138,6 +143,7 @@ function Groups({ data }: GroupsProps) {
           key={g.id}
           group={g}
           guidelines={buckets.get(g.id ?? "") ?? []}
+          refs={refs}
         />
       ))}
       {ungrouped.length > 0 ? (
@@ -148,6 +154,7 @@ function Groups({ data }: GroupsProps) {
             description: "Guidelines not assigned to a declared group.",
           }}
           guidelines={ungrouped}
+          refs={refs}
         />
       ) : null}
     </section>
@@ -157,23 +164,25 @@ function Groups({ data }: GroupsProps) {
 interface GroupViewProps {
   group: Group;
   guidelines: Guideline[];
+  refs?: MappingReference[];
 }
 
-function GroupView({ group, guidelines }: GroupViewProps) {
+function GroupView({ group, guidelines, refs }: GroupViewProps) {
   return (
     <section data-gemara-part="group" data-gemara-group-id={group.id ?? ""}>
       <Heading offset={1}>{group.title}</Heading>
       {group.description ? <Prose content={group.description} as="p" /> : null}
-      <GuidelineList guidelines={guidelines} />
+      <GuidelineList guidelines={guidelines} refs={refs} />
     </section>
   );
 }
 
 interface GuidelineListProps {
   guidelines: Guideline[];
+  refs?: MappingReference[];
 }
 
-function GuidelineList({ guidelines }: GuidelineListProps) {
+function GuidelineList({ guidelines, refs }: GuidelineListProps) {
   if (guidelines.length === 0) {
     return <p data-gemara-empty="guidelines">No guidelines in this group.</p>;
   }
@@ -181,7 +190,7 @@ function GuidelineList({ guidelines }: GuidelineListProps) {
     <ol data-gemara-part="guideline-list">
       {guidelines.map((g) => (
         <li key={g.id}>
-          <GuidelineView guideline={g} />
+          <GuidelineView guideline={g} refs={refs} />
         </li>
       ))}
     </ol>
@@ -190,9 +199,10 @@ function GuidelineList({ guidelines }: GuidelineListProps) {
 
 interface GuidelineViewProps {
   guideline: Guideline;
+  refs?: MappingReference[];
 }
 
-function GuidelineView({ guideline }: GuidelineViewProps) {
+function GuidelineView({ guideline, refs }: GuidelineViewProps) {
   return (
     <article
       data-gemara-part="guideline"
@@ -224,7 +234,7 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
       ) : null}
       {guideline.principles && guideline.principles.length > 0 ? (
         <References>
-          <Mappings label="Principles" mappings={guideline.principles} />
+          <Mappings label="Principles" mappings={guideline.principles} refs={refs} />
         </References>
       ) : null}
       {guideline.extends ? (
@@ -234,6 +244,7 @@ function GuidelineView({ guideline }: GuidelineViewProps) {
             kind="entry"
             id={guideline.extends["entry-id"] ?? ""}
             referenceId={guideline.extends["reference-id"]}
+            url={mappingReferenceUrl(refs, guideline.extends["reference-id"])}
             relation="extends"
           >
             {guideline.extends["entry-id"]}
@@ -258,9 +269,10 @@ function References({ children }: { children: ReactNode }) {
 interface MappingsProps {
   label: string;
   mappings: MultiEntryMapping[];
+  refs?: MappingReference[];
 }
 
-function Mappings({ label, mappings }: MappingsProps) {
+function Mappings({ label, mappings, refs }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
       <Heading offset={3}>{label}</Heading>
@@ -281,6 +293,7 @@ function Mappings({ label, mappings }: MappingsProps) {
                         kind="entry"
                         id={entryId ?? ""}
                         referenceId={m["reference-id"]}
+                        url={mappingReferenceUrl(refs, m["reference-id"])}
                         relation={label.toLowerCase()}
                       >
                         {entryId}

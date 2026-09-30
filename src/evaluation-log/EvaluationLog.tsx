@@ -5,7 +5,10 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { EvaluationLog as EvaluationLogData } from "../generated/types.js";
+
+type MappingReference = NonNullable<EvaluationLogData["metadata"]["mapping-references"]>[number];
 
 /**
  * Headless EvaluationLog renderer (Gemara Layer 4 evaluation results).
@@ -135,6 +138,10 @@ function Header({ data }: WithDataProps) {
               <ArtifactRef
                 kind="artifact"
                 id={metadata.lexicon["reference-id"] ?? ""}
+                url={mappingReferenceUrl(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
                 relation="lexicon"
               />
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
@@ -199,7 +206,7 @@ function Evaluations({ data }: WithDataProps) {
       <ol data-gemara-part="evaluation-list">
         {evaluations.map((e, i) => (
           <li key={`${e.control?.["entry-id"] ?? "evaluation"}-${i}`}>
-            <EvaluationView evaluation={e} />
+            <EvaluationView evaluation={e} refs={data.metadata["mapping-references"]} />
           </li>
         ))}
       </ol>
@@ -209,9 +216,10 @@ function Evaluations({ data }: WithDataProps) {
 
 interface EvaluationViewProps {
   evaluation: Evaluation;
+  refs?: MappingReference[];
 }
 
-function EvaluationView({ evaluation }: EvaluationViewProps) {
+function EvaluationView({ evaluation, refs }: EvaluationViewProps) {
   const control = evaluation.control;
   const controlId = control?.["entry-id"] ?? "";
   return (
@@ -228,6 +236,7 @@ function EvaluationView({ evaluation }: EvaluationViewProps) {
                 kind="entry"
                 id={controlId}
                 referenceId={control["reference-id"]}
+                url={mappingReferenceUrl(refs, control["reference-id"])}
                 relation="control"
               >
                 {controlId}
@@ -243,16 +252,17 @@ function EvaluationView({ evaluation }: EvaluationViewProps) {
           <Prose content={evaluation.message} as="p" />
         </div>
       ) : null}
-      <AssessmentLogs logs={evaluation["assessment-logs"] ?? []} />
+      <AssessmentLogs logs={evaluation["assessment-logs"] ?? []} refs={refs} />
     </article>
   );
 }
 
 interface AssessmentLogsProps {
   logs: AssessmentLog[];
+  refs?: MappingReference[];
 }
 
-function AssessmentLogs({ logs }: AssessmentLogsProps) {
+function AssessmentLogs({ logs, refs }: AssessmentLogsProps) {
   if (logs.length === 0) {
     return <p data-gemara-empty="assessment-logs">No assessment logs recorded.</p>;
   }
@@ -262,7 +272,7 @@ function AssessmentLogs({ logs }: AssessmentLogsProps) {
       <ol data-gemara-part="assessment-log-list">
         {logs.map((log, i) => (
           <li key={`${log.requirement?.["entry-id"] ?? "assessment"}-${i}`}>
-            <AssessmentLogView log={log} />
+            <AssessmentLogView log={log} refs={refs} />
           </li>
         ))}
       </ol>
@@ -272,9 +282,10 @@ function AssessmentLogs({ logs }: AssessmentLogsProps) {
 
 interface AssessmentLogViewProps {
   log: AssessmentLog;
+  refs?: MappingReference[];
 }
 
-function AssessmentLogView({ log }: AssessmentLogViewProps) {
+function AssessmentLogView({ log, refs }: AssessmentLogViewProps) {
   const requirement = log.requirement;
   const requirementId = requirement?.["entry-id"] ?? "";
   const executed = log["steps-executed"];
@@ -288,6 +299,7 @@ function AssessmentLogView({ log }: AssessmentLogViewProps) {
               kind="entry"
               id={requirementId}
               referenceId={requirement["reference-id"]}
+              url={mappingReferenceUrl(refs, requirement["reference-id"])}
               relation="requirement"
             >
               {requirementId}
@@ -332,6 +344,7 @@ function AssessmentLogView({ log }: AssessmentLogViewProps) {
             kind="entry"
             id={log.plan["entry-id"] ?? ""}
             referenceId={log.plan["reference-id"]}
+            url={mappingReferenceUrl(refs, log.plan["reference-id"])}
             relation="plan"
           >
             {log.plan["entry-id"]}
