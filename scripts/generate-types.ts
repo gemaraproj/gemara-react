@@ -245,16 +245,26 @@ export type ControlCatalog = Omit<Schemas["ControlCatalog"], "metadata" | "contr
 };
 
 /** A loaded GuidanceCatalog with the discriminator narrowed to the literal. */
-export type GuidanceCatalog = Omit<Schemas["GuidanceCatalog"], "metadata" | "guidelines"> & {
+export type GuidanceCatalog = Omit<
+  Schemas["GuidanceCatalog"],
+  "metadata" | "guidelines" | "exemptions"
+> & {
   metadata: Metadata & { type: "GuidanceCatalog" };
   groups?: Schemas["Group"][];
   title?: string;
   extends?: Schemas["ArtifactMapping"][];
   imports?: MultiEntryMapping[];
   guidelines?: Array<
-    Omit<NonNullable<Schemas["GuidanceCatalog"]["guidelines"]>[number], "principles"> & {
+    Omit<
+      NonNullable<Schemas["GuidanceCatalog"]["guidelines"]>[number],
+      "principles" | "vectors"
+    > & {
       principles?: MultiEntryMapping[];
+      vectors?: MultiEntryMapping[];
     }
+  >;
+  exemptions?: Array<
+    Omit<Schemas["Exemption"], "redirect"> & { redirect?: MultiEntryMapping }
   >;
 };
 

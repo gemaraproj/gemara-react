@@ -52,6 +52,8 @@ interface Props {
   markdown?: string;
   /** OSCAL projection produced server-side by go-gemara's `oscalexport`. */
   oscal?: string;
+  /** OSCAL Profile emitted alongside the Catalog by `oscalexport guidance`. */
+  oscalProfile?: string;
 }
 
 /**
@@ -68,7 +70,7 @@ interface Props {
  *  2. The raw YAML tab is just the source string the page already has.
  *  3. The component never converts or validates; go-gemara produced the OSCAL.
  */
-export default function MultiFormatViewer({ type, data, yaml, markdown, oscal }: Props) {
+export default function MultiFormatViewer({ type, data, yaml, markdown, oscal, oscalProfile }: Props) {
   const Preview = RENDERERS[type];
   const tabs: FormatTab[] = [
     { id: "preview", label: "Preview", preview: <Preview data={data} headingLevel={3} /> },
@@ -83,6 +85,10 @@ export default function MultiFormatViewer({ type, data, yaml, markdown, oscal }:
     // shows the idiom for when the string arrives as one flat line from the hub.
     const prettyOscal = JSON.stringify(JSON.parse(oscal), null, 2);
     tabs.push({ id: "oscal", label: "OSCAL", language: "json", content: prettyOscal });
+  }
+  if (oscalProfile !== undefined) {
+    const pretty = JSON.stringify(JSON.parse(oscalProfile), null, 2);
+    tabs.push({ id: "oscal-profile", label: "OSCAL Profile", language: "json", content: pretty });
   }
 
   return (

@@ -13,6 +13,8 @@ type MappingReference = NonNullable<GuidanceCatalogData["metadata"]["mapping-ref
 type Guideline = NonNullable<GuidanceCatalogData["guidelines"]>[number];
 type Group = NonNullable<GuidanceCatalogData["groups"]>[number];
 type MultiEntryMapping = NonNullable<Guideline["principles"]>[number];
+type Statement = NonNullable<Guideline["statements"]>[number];
+type Exemption = NonNullable<GuidanceCatalogData["exemptions"]>[number];
 
 export interface GuidanceCatalogProps {
   data: GuidanceCatalogData;
@@ -39,6 +41,9 @@ function GuidanceCatalogRoot({ data, headingLevel = 1, children }: GuidanceCatal
               </section>
             ) : null}
             <Groups data={data} />
+            {data.exemptions && data.exemptions.length > 0 ? (
+              <Exemptions exemptions={data.exemptions} refs={data.metadata["mapping-references"]} />
+            ) : null}
           </>
         )}
       </article>
@@ -226,16 +231,57 @@ function GuidelineView({ guideline, refs }: GuidelineViewProps) {
           <Prose content={guideline.objective} as="p" />
         </section>
       ) : null}
-      {guideline.rationale?.importance ? (
+      {guideline.rationale ? (
         <section data-gemara-part="rationale">
           <Heading offset={3}>Rationale</Heading>
-          <Prose content={guideline.rationale.importance} as="p" />
+          {guideline.rationale.importance ? (
+            <Prose content={guideline.rationale.importance} as="p" />
+          ) : null}
+          {guideline.rationale.goals && guideline.rationale.goals.length > 0 ? (
+            <ul data-gemara-part="goals">
+              {guideline.rationale.goals.map((goal, i) => (
+                <li key={i} data-gemara-part="goal">
+                  {goal}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       ) : null}
-      {guideline.principles && guideline.principles.length > 0 ? (
+      {guideline.applicability && guideline.applicability.length > 0 ? (
+        <p data-gemara-part="applicability">
+          Applicability: {guideline.applicability.join(", ")}
+        </p>
+      ) : null}
+      {guideline.recommendations && guideline.recommendations.length > 0 ? (
+        <Recommendations recommendations={guideline.recommendations} offset={3} />
+      ) : null}
+      {guideline.statements && guideline.statements.length > 0 ? (
+        <StatementList statements={guideline.statements} />
+      ) : null}
+      {(guideline.principles && guideline.principles.length > 0) ||
+      (guideline.vectors && guideline.vectors.length > 0) ? (
         <References>
-          <Mappings label="Principles" mappings={guideline.principles} refs={refs} />
+          {guideline.principles && guideline.principles.length > 0 ? (
+            <Mappings label="Principles" mappings={guideline.principles} refs={refs} />
+          ) : null}
+          {guideline.vectors && guideline.vectors.length > 0 ? (
+            <Mappings label="Vectors" mappings={guideline.vectors} refs={refs} />
+          ) : null}
         </References>
+      ) : null}
+      {guideline["see-also"] && guideline["see-also"].length > 0 ? (
+        <p data-gemara-part="see-also">
+          See also:{" "}
+          {guideline["see-also"].map((id, i) => (
+            <span key={`${id}-${i}`}>
+              {i > 0 ? ", " : null}
+              <ArtifactRef kind="entry" id={id} relation="see-also">
+                {id}
+              </ArtifactRef>
+            </span>
+          ))}
+        </p>
       ) : null}
       {guideline.extends ? (
         <p data-gemara-part="extends">
@@ -252,6 +298,86 @@ function GuidelineView({ guideline, refs }: GuidelineViewProps) {
         </p>
       ) : null}
     </article>
+  );
+}
+
+interface RecommendationsProps {
+  recommendations: string[];
+  /** Heading offset: 3 under a guideline, 4 under a statement. */
+  offset: number;
+}
+
+function Recommendations({ recommendations, offset }: RecommendationsProps) {
+  return (
+    <section data-gemara-part="recommendations">
+      <Heading offset={offset}>Recommendations</Heading>
+      <ul>
+        {recommendations.map((r, i) => (
+          <li key={i} data-gemara-part="recommendation">
+            <Prose content={r} as="p" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+interface StatementListProps {
+  statements: Statement[];
+}
+
+function StatementList({ statements }: StatementListProps) {
+  return (
+    <section data-gemara-part="statements">
+      <Heading offset={3}>Statements</Heading>
+      <ol>
+        {statements.map((st) => (
+          <li
+            key={st.id}
+            data-gemara-part="statement"
+            data-gemara-statement-id={st.id ?? ""}
+          >
+            <Heading offset={4}>
+              <span data-gemara-part="statement-id">{st.id}</span>
+              {st.title ? (
+                <>
+                  {" "}
+                  <span data-gemara-part="statement-title">{st.title}</span>
+                </>
+              ) : null}
+            </Heading>
+            {st.text ? <Prose content={st.text} as="p" /> : null}
+            {st.recommendations && st.recommendations.length > 0 ? (
+              <Recommendations recommendations={st.recommendations} offset={4} />
+            ) : null}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+interface ExemptionsProps {
+  exemptions: Exemption[];
+  refs?: MappingReference[];
+}
+
+function Exemptions({ exemptions, refs }: ExemptionsProps) {
+  return (
+    <section data-gemara-part="exemptions">
+      <Heading offset={1}>Exemptions</Heading>
+      <ul>
+        {exemptions.map((x, i) => (
+          <li key={i} data-gemara-part="exemption">
+            <Prose content={x.description} as="p" />
+            {x.reason ? (
+              <p data-gemara-part="exemption-reason">Reason: {x.reason}</p>
+            ) : null}
+            {x.redirect ? <Mappings label="Redirect" mappings={[x.redirect]} refs={refs} /> : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -316,6 +442,9 @@ export const GuidanceCatalog = Object.assign(GuidanceCatalogRoot, {
   Groups,
   Group: GroupView,
   Guideline: GuidelineView,
+  Statements: StatementList,
+  Recommendations,
+  Exemptions,
   References,
   Mappings,
 });
