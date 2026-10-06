@@ -18,7 +18,7 @@ import { EnforcementLog } from "@gemara/react/enforcement-log";
 import { EvaluationLog } from "@gemara/react/evaluation-log";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Renderer = ComponentType<{ data: any; headingLevel?: number }>;
+type Renderer = ComponentType<{ data: any; headingLevel?: number; idPrefix?: string }>;
 
 /**
  * One renderer per artifact type. Importing all thirteen here is fine for a
@@ -73,7 +73,7 @@ interface Props {
 export default function MultiFormatViewer({ type, data, yaml, markdown, oscal, oscalProfile }: Props) {
   const Preview = RENDERERS[type];
   const tabs: FormatTab[] = [
-    { id: "preview", label: "Preview", preview: <Preview data={data} headingLevel={3} /> },
+    { id: "preview", label: "Preview", preview: <Preview data={data} headingLevel={3} idPrefix="preview-" /> },
     { id: "yaml", label: "YAML", language: "yaml", content: yaml },
   ];
   if (markdown !== undefined) {

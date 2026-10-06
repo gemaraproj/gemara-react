@@ -4,6 +4,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { DocumentReferences } from "../primitives/DocumentReferences.js";
 import type { VectorCatalog as VectorCatalogData } from "../generated/types.js";
 
@@ -32,21 +33,29 @@ export interface VectorCatalogProps {
    * composing into a host page that already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function VectorCatalogRoot({ data, headingLevel = 1, children }: VectorCatalogProps) {
+function VectorCatalogRoot({ data, headingLevel = 1, idPrefix, children }: VectorCatalogProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="VectorCatalog" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            <Groups data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="VectorCatalog" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              <Groups data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -192,11 +201,12 @@ interface VectorViewProps {
 }
 
 function VectorView({ vector }: VectorViewProps) {
+  const idPrefix = useIdPrefix();
   return (
     <article
       data-gemara-part="vector"
       data-gemara-vector-id={vector.id ?? ""}
-      id={vector.id ? `vector-${vector.id}` : undefined}
+      id={vector.id ? `${idPrefix}vector-${vector.id}` : undefined}
     >
       <header>
         <Heading offset={2}>

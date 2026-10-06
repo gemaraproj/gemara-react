@@ -1,4 +1,5 @@
 import { CollapsibleGroup } from "@gemara/react/interactive";
+import { IdPrefixScope } from "@gemara/react/primitives";
 import { ControlCatalog } from "@gemara/react/control-catalog";
 import type { ControlCatalogData } from "@gemara/react";
 
@@ -19,7 +20,9 @@ export default function CollapsibleControlGroup({ data, groupId }: Props) {
 
   return (
     <CollapsibleGroup label={`Toggle group: ${group.title}`} defaultOpen>
-      <ControlCatalog.Group group={group} controls={controls} />
+      <IdPrefixScope prefix="island-">
+        <ControlCatalog.Group group={group} controls={controls} />
+      </IdPrefixScope>
     </CollapsibleGroup>
   );
 }

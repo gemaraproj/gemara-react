@@ -1,0 +1,7 @@
+{
+  "defaults": {
+    "runners": ["axe", "htmlcs"],
+    "standard": "WCAG2AA",
+    "chromeLaunchConfig": { "args": ["--no-sandbox"] }
+  }
+}

@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type {
   AuditLog as AuditLogData,
@@ -65,26 +66,34 @@ export interface AuditLogProps {
    * higher) when composing into a host page that already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function AuditLogRoot({ data, headingLevel = 1, children }: AuditLogProps) {
+function AuditLogRoot({ data, headingLevel = 1, idPrefix, children }: AuditLogProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="AuditLog" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            <Target data={data} />
-            <Owner data={data} />
-            <Summary data={data} />
-            <Criteria data={data} />
-            <Results data={data} />
-            <MappingReferences data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="AuditLog" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              <Target data={data} />
+              <Owner data={data} />
+              <Summary data={data} />
+              <Criteria data={data} />
+              <Results data={data} />
+              <MappingReferences data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -348,12 +357,13 @@ interface ResultViewProps {
 }
 
 function ResultView({ result }: ResultViewProps) {
+  const idPrefix = useIdPrefix();
   return (
     <article
       data-gemara-part="result"
       data-gemara-result-id={result.id ?? ""}
       data-gemara-result-type={result.type ?? ""}
-      id={result.id ? `result-${result.id}` : undefined}
+      id={result.id ? `${idPrefix}result-${result.id}` : undefined}
     >
       <header>
         <Heading offset={2}>

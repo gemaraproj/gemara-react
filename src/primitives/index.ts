@@ -14,3 +14,4 @@ export {
   type HeadingProps,
   type HeadingScopeProps,
 } from "./Heading.js";
+export { IdPrefixScope, type IdPrefixScopeProps } from "./IdPrefix.js";

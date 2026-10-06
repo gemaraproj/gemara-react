@@ -162,4 +162,11 @@ describe("ControlCatalog", () => {
     expect(container.querySelectorAll("h6").length).toBeGreaterThan(0);
     expect(container.querySelector("h7")).toBeNull();
   });
+
+  it("prefixes entry anchor ids with idPrefix", () => {
+    const { container } = render(<ControlCatalog data={data} idPrefix="preview-" />);
+    const first = data.controls?.[0]?.id;
+    expect(first).toBeTruthy();
+    expect(container.querySelector(`[data-gemara-control-id="${first}"]`)?.id).toBe(`preview-control-${first}`);
+  });
 });

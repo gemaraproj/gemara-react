@@ -7,7 +7,7 @@ const shared = {
   format: ["esm", "cjs"] as ("esm" | "cjs")[],
   dts: true,
   sourcemap: true,
-  splitting: false,
+  splitting: true,
   treeshake: true,
   external: ["react", "react-dom", "@radix-ui/react-slot"],
 };

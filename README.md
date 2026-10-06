@@ -161,6 +161,17 @@ A worked Astro example wiring all three (Preview + raw YAML + pre-converted Mark
 
 It implements the ARIA tabs pattern with **automatic activation** — Arrow keys move focus and switch the panel in one step (Left/Right wrap; Home/End jump to first/last). Provide `aria-label` (or `aria-labelledby`) so the tablist has an accessible name — important when several viewers share a page. Because it holds tab state, it lives in `@gemara/react/interactive` and carries `"use client"`.
 
+## Accessibility
+
+Every renderer is checked against [axe-core](https://github.com/dequelabs/axe-core) (WCAG 2.2 AA plus best-practice rules) in the test suite, and CI audits the built Astro example with [pa11y-ci](https://github.com/pa11y/pa11y-ci). Renderers emit deterministic anchor ids (`control-<id>`, `guideline-<id>`, …) for deep linking. If the same artifact renders more than once on a page, give each instance an `idPrefix` so the anchors stay unique:
+
+```tsx
+<ControlCatalog data={data} />
+<ControlCatalog data={data} idPrefix="preview-" />  // anchors become preview-control-<id>
+```
+
+When composing standalone parts without the root (e.g. `<ControlCatalog.Group>` inside an island), wrap them in `IdPrefixScope` from `@gemara/react/primitives` instead.
+
 ## React Server Components
 
 The default artifact renderers and all primitives are server-component-safe. The interactive components (`CollapsibleGroup`, `FormatTabs`) live in `@gemara/react/interactive` and carry a `"use client"` directive in their built output — RSC bundlers route them into the client graph automatically.

@@ -76,82 +76,84 @@ const others = [
     <title>gemara-react Astro example</title>
   </head>
   <body>
-    <h1>gemara-react: ControlCatalog (server-rendered)</h1>
-    <GemaraProvider>
-      <ControlCatalog data={data} headingLevel={2} />
-    </GemaraProvider>
+    <main>
+      <h1>gemara-react: ControlCatalog (server-rendered)</h1>
+      <GemaraProvider>
+        <ControlCatalog data={data} headingLevel={2} />
+      </GemaraProvider>
 
-    <hr />
+      <hr />
 
-    <h2>Interactive island (client:idle)</h2>
-    {firstGroupId && (
-      <CollapsibleControlGroup
+      <h2>Interactive island (client:idle)</h2>
+      {firstGroupId && (
+        <CollapsibleControlGroup
+          client:idle
+          data={data}
+          groupId={firstGroupId}
+        />
+      )}
+
+      <hr />
+
+      <h2>Multi-format viewer (client:idle)</h2>
+      <p>
+        Preview (rendered from the structured data) + raw YAML, Markdown, and
+        OSCAL. The Markdown and OSCAL are pre-converted by go-gemara and passed in
+        as strings; the component does no conversion or validation.
+      </p>
+      <MultiFormatViewer
         client:idle
+        type={ccc.type}
         data={data}
-        groupId={firstGroupId}
+        yaml={ccc.raw}
+        markdown={markdown}
+        oscal={oscal}
       />
-    )}
 
-    <hr />
+      <hr />
 
-    <h2>Multi-format viewer (client:idle)</h2>
-    <p>
-      Preview (rendered from the structured data) + raw YAML, Markdown, and
-      OSCAL. The Markdown and OSCAL are pre-converted by go-gemara and passed in
-      as strings; the component does no conversion or validation.
-    </p>
-    <MultiFormatViewer
-      client:idle
-      type={ccc.type}
-      data={data}
-      yaml={ccc.raw}
-      markdown={markdown}
-      oscal={oscal}
-    />
+      <h1>gemara-react: GuidanceCatalog (server-rendered)</h1>
+      <GemaraProvider>
+        <GuidanceCatalog data={guidance} headingLevel={2} />
+      </GemaraProvider>
 
-    <hr />
+      <hr />
 
-    <h1>gemara-react: GuidanceCatalog (server-rendered)</h1>
-    <GemaraProvider>
-      <GuidanceCatalog data={guidance} headingLevel={2} />
-    </GemaraProvider>
+      <h2>Interactive island (client:idle)</h2>
+      {firstGuidanceGroupId && (
+        <CollapsibleGuidanceGroup
+          client:idle
+          data={guidance}
+          groupId={firstGuidanceGroupId}
+        />
+      )}
 
-    <hr />
+      <hr />
 
-    <h2>Interactive island (client:idle)</h2>
-    {firstGuidanceGroupId && (
-      <CollapsibleGuidanceGroup
+      <h2>Multi-format viewer (client:idle)</h2>
+      <p>
+        Preview + raw YAML + OSCAL Catalog and Profile (the pair
+        <code>oscalexport guidance</code> emits). No Markdown tab: gemaraconv has
+        no guidance Markdown projection yet.
+      </p>
+      <MultiFormatViewer
         client:idle
+        type={aigf.type}
         data={guidance}
-        groupId={firstGuidanceGroupId}
+        yaml={aigf.raw}
+        oscal={aigfOscal}
+        oscalProfile={aigfProfile}
       />
-    )}
 
-    <hr />
+      <hr />
 
-    <h2>Multi-format viewer (client:idle)</h2>
-    <p>
-      Preview + raw YAML + OSCAL Catalog and Profile (the pair
-      <code>oscalexport guidance</code> emits). No Markdown tab: gemaraconv has
-      no guidance Markdown projection yet.
-    </p>
-    <MultiFormatViewer
-      client:idle
-      type={aigf.type}
-      data={guidance}
-      yaml={aigf.raw}
-      oscal={aigfOscal}
-      oscalProfile={aigfProfile}
-    />
-
-    <hr />
-
-    <h2>All other artifact types: Preview + raw YAML (client:idle)</h2>
-    {others.map((f) => (
-      <section>
-        <h3>{f.type} <small>({f.name})</small></h3>
-        <MultiFormatViewer client:idle type={f.type} data={f.parsed} yaml={f.raw} />
-      </section>
-    ))}
+      <h2>All other artifact types: Preview + raw YAML (client:idle)</h2>
+      {others.map((f) => (
+        <section>
+          <h3>{f.type} <small>({f.name})</small></h3>
+          <MultiFormatViewer client:idle type={f.type} data={f.parsed} yaml={f.raw} />
+        </section>
+      ))}
+    </main>
   </body>
 </html>

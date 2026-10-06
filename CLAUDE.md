@@ -21,6 +21,7 @@ All from this directory:
 - `npm run typecheck` — `tsc --noEmit`.
 - `npm run build` — `tsup` builds ESM + CJS + `.d.ts` for each subpath entry, then re-injects `"use client"` into `dist/interactive/*` (tsup/rollup strips directive prologues during bundling; RSC bundlers require it in the *built* file).
 - `npm run generate` — regenerates `src/generated/types.ts` from the Gemara OpenAPI schema. See "Type generation" below.
+- `cd examples/astro && npm run a11y` — pa11y-ci audit of the built example (`npm run build` there first). The unit-level axe-core checks run as part of `npm test` (`tests/a11y.test.tsx`).
 
 The Astro example under `examples/astro/` depends on the library via `file:../..` — `npm ci` there expects `dist/` to already exist. CI builds the library first, then `cd examples/astro && npm ci && npm run build`. Replicate that order locally.
 

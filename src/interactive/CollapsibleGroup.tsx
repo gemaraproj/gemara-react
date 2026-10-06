@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 export interface CollapsibleGroupProps {
   /** Visible label for the toggle. */
@@ -27,7 +27,6 @@ export function CollapsibleGroup({
   children,
 }: CollapsibleGroupProps) {
   const [open, setOpen] = useState(defaultOpen);
-  const id = useId();
 
   return (
     <details
@@ -36,10 +35,10 @@ export function CollapsibleGroup({
       data-gemara-part="collapsible"
       data-gemara-open={open ? "" : undefined}
     >
-      <summary id={id} data-gemara-part="collapsible-trigger">
+      <summary data-gemara-part="collapsible-trigger">
         {label}
       </summary>
-      <div data-gemara-part="collapsible-content" aria-labelledby={id}>
+      <div data-gemara-part="collapsible-content">
         {children}
       </div>
     </details>
