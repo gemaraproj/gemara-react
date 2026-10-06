@@ -8,8 +8,9 @@ export interface IdPrefixScopeProps {
   children: ReactNode;
 }
 
-export function IdPrefixScope({ prefix = "", children }: IdPrefixScopeProps) {
-  return <IdPrefixContext.Provider value={prefix}>{children}</IdPrefixContext.Provider>;
+export function IdPrefixScope({ prefix, children }: IdPrefixScopeProps) {
+  const outer = useContext(IdPrefixContext);
+  return <IdPrefixContext.Provider value={prefix ?? outer}>{children}</IdPrefixContext.Provider>;
 }
 
 export function useIdPrefix(): string {

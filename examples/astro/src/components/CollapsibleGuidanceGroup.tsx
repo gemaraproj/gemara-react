@@ -1,4 +1,5 @@
 import { CollapsibleGroup } from "@gemara/react/interactive";
+import { IdPrefixScope } from "@gemara/react/primitives";
 import { GuidanceCatalog } from "@gemara/react/guidance-catalog";
 import type { GuidanceCatalogData } from "@gemara/react";
 
@@ -15,9 +16,9 @@ export default function CollapsibleGuidanceGroup({ data, groupId }: Props) {
 
   return (
     <CollapsibleGroup label={`Toggle group: ${group.title}`} defaultOpen>
-      <GuidanceCatalog data={data} idPrefix="island-">
+      <IdPrefixScope prefix="island-">
         <GuidanceCatalog.Group group={group} guidelines={guidelines} />
-      </GuidanceCatalog>
+      </IdPrefixScope>
     </CollapsibleGroup>
   );
 }

@@ -170,6 +170,8 @@ Every renderer is checked against [axe-core](https://github.com/dequelabs/axe-co
 <ControlCatalog data={data} idPrefix="preview-" />  // anchors become preview-control-<id>
 ```
 
+When composing standalone parts without the root (e.g. `<ControlCatalog.Group>` inside an island), wrap them in `IdPrefixScope` from `@gemara/react/primitives` instead.
+
 ## React Server Components
 
 The default artifact renderers and all primitives are server-component-safe. The interactive components (`CollapsibleGroup`, `FormatTabs`) live in `@gemara/react/interactive` and carry a `"use client"` directive in their built output — RSC bundlers route them into the client graph automatically.

@@ -21,6 +21,7 @@ import { RiskCatalog } from "../src/risk-catalog/index.js";
 import { ThreatCatalog } from "../src/threat-catalog/index.js";
 import { VectorCatalog } from "../src/vector-catalog/index.js";
 import { detectArtifactType, type ArtifactType } from "../src/generated/types.js";
+import { IdPrefixScope } from "../src/primitives/index.js";
 
 const FIXTURE_DIR = resolve(__dirname, "..", "..", "gemara", "test", "test-data");
 
@@ -80,6 +81,25 @@ describe("accessibility (axe-core)", () => {
       const Renderer = RENDERERS[type];
       const { container } = render(<Renderer data={data as never} />);
       await expectNoViolations(container);
+    });
+  }
+
+  for (const name of FIXTURES) {
+    it(`${name} rendered twice yields no duplicate ids when the second is prefixed`, () => {
+      const data = parseYaml(readFileSync(resolve(FIXTURE_DIR, name), "utf8"));
+      const type = detectArtifactType(data);
+      if (!type) throw new Error(`Unrecognized artifact type in ${name}`);
+      const Renderer = RENDERERS[type];
+      const { container } = render(
+        <>
+          <Renderer data={data as never} />
+          <IdPrefixScope prefix="again-">
+            <Renderer data={data as never} />
+          </IdPrefixScope>
+        </>,
+      );
+      const ids = Array.from(container.querySelectorAll("[id]"), (el) => el.id);
+      expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
     });
   }
 
