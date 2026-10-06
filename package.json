@@ -132,7 +132,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:dist": "node scripts/smoke-dist.mjs"
   },
   "peerDependencies": {
     "react": ">=18"
