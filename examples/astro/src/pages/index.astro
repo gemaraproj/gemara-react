@@ -76,6 +76,7 @@ const others = [
     <title>gemara-react Astro example</title>
   </head>
   <body>
+    <main>
     <h1>gemara-react: ControlCatalog (server-rendered)</h1>
     <GemaraProvider>
       <ControlCatalog data={data} headingLevel={2} />
@@ -153,5 +154,6 @@ const others = [
         <MultiFormatViewer client:idle type={f.type} data={f.parsed} yaml={f.raw} />
       </section>
     ))}
+    </main>
   </body>
 </html>

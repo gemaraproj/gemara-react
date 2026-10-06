@@ -6,6 +6,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import type {
   MappingDocument as MappingDocumentData,
   SchemaGroup,
@@ -71,31 +72,40 @@ export interface MappingDocumentProps {
    * composing into a host page that already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
 function MappingDocumentRoot({
   data,
   headingLevel = 1,
+  idPrefix,
   children,
 }: MappingDocumentProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article
-        data-gemara-artifact="MappingDocument"
-        data-gemara-id={data.metadata.id ?? ""}
-      >
-        {children ?? (
-          <>
-            <Header data={data} />
-            <MappingReferences data={data} />
-            <Scope data={data} />
-            <ApplicabilityGroups data={data} />
-            <Mappings data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article
+          data-gemara-artifact="MappingDocument"
+          data-gemara-id={data.metadata.id ?? ""}
+        >
+          {children ?? (
+            <>
+              <Header data={data} />
+              <MappingReferences data={data} />
+              <Scope data={data} />
+              <ApplicabilityGroups data={data} />
+              <Mappings data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -346,13 +356,14 @@ function MappingView({
   sourceReferenceId,
   targetReferenceId,
 }: MappingViewProps) {
+  const idPrefix = useIdPrefix();
   const targets = mapping.targets ?? [];
   return (
     <article
       data-gemara-part="mapping"
       data-gemara-mapping-id={mapping.id ?? ""}
       data-gemara-relationship={mapping.relationship ?? ""}
-      id={mapping.id ? `mapping-${mapping.id}` : undefined}
+      id={mapping.id ? `${idPrefix}mapping-${mapping.id}` : undefined}
     >
       <header>
         <Heading offset={2}>

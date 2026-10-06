@@ -15,7 +15,9 @@ export default function CollapsibleGuidanceGroup({ data, groupId }: Props) {
 
   return (
     <CollapsibleGroup label={`Toggle group: ${group.title}`} defaultOpen>
-      <GuidanceCatalog.Group group={group} guidelines={guidelines} />
+      <GuidanceCatalog data={data} idPrefix="island-">
+        <GuidanceCatalog.Group group={group} guidelines={guidelines} />
+      </GuidanceCatalog>
     </CollapsibleGroup>
   );
 }

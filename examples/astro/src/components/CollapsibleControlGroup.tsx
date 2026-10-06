@@ -19,7 +19,9 @@ export default function CollapsibleControlGroup({ data, groupId }: Props) {
 
   return (
     <CollapsibleGroup label={`Toggle group: ${group.title}`} defaultOpen>
-      <ControlCatalog.Group group={group} controls={controls} />
+      <ControlCatalog data={data} idPrefix="island-">
+        <ControlCatalog.Group group={group} controls={controls} />
+      </ControlCatalog>
     </CollapsibleGroup>
   );
 }

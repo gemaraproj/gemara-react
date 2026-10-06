@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { Lexicon as LexiconData } from "../generated/types.js";
 
@@ -33,21 +34,29 @@ export interface LexiconProps {
    * (or higher) when composing into a host page that already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function LexiconRoot({ data, headingLevel = 1, children }: LexiconProps) {
+function LexiconRoot({ data, headingLevel = 1, idPrefix, children }: LexiconProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="Lexicon" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            <Terms data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="Lexicon" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              <Terms data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -163,13 +172,14 @@ interface TermViewProps {
 }
 
 function TermView({ term }: TermViewProps) {
+  const idPrefix = useIdPrefix();
   const references = term.references ?? [];
   const synonyms = term.synonyms ?? [];
   return (
     <article
       data-gemara-part="term"
       data-gemara-term-id={term.id ?? ""}
-      id={term.id ? `term-${term.id}` : undefined}
+      id={term.id ? `${idPrefix}term-${term.id}` : undefined}
     >
       <header>
         <Heading offset={1}>

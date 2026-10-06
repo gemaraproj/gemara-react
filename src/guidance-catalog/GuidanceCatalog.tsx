@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { GuidanceCatalog as GuidanceCatalogData } from "../generated/types.js";
 
@@ -26,29 +27,37 @@ export interface GuidanceCatalogProps {
    * already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function GuidanceCatalogRoot({ data, headingLevel = 1, children }: GuidanceCatalogProps) {
+function GuidanceCatalogRoot({ data, headingLevel = 1, idPrefix, children }: GuidanceCatalogProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="GuidanceCatalog" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            {data["front-matter"] ? (
-              <section data-gemara-part="front-matter">
-                <Prose content={data["front-matter"]} as="div" />
-              </section>
-            ) : null}
-            <Groups data={data} />
-            {data.exemptions && data.exemptions.length > 0 ? (
-              <Exemptions exemptions={data.exemptions} refs={data.metadata["mapping-references"]} />
-            ) : null}
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="GuidanceCatalog" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              {data["front-matter"] ? (
+                <section data-gemara-part="front-matter">
+                  <Prose content={data["front-matter"]} as="div" />
+                </section>
+              ) : null}
+              <Groups data={data} />
+              {data.exemptions && data.exemptions.length > 0 ? (
+                <Exemptions exemptions={data.exemptions} refs={data.metadata["mapping-references"]} />
+              ) : null}
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -209,11 +218,12 @@ interface GuidelineViewProps {
 }
 
 function GuidelineView({ guideline, refs }: GuidelineViewProps) {
+  const idPrefix = useIdPrefix();
   return (
     <article
       data-gemara-part="guideline"
       data-gemara-guideline-id={guideline.id ?? ""}
-      id={guideline.id ? `guideline-${guideline.id}` : undefined}
+      id={guideline.id ? `${idPrefix}guideline-${guideline.id}` : undefined}
     >
       <header>
         <Heading offset={2}>

@@ -4,6 +4,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { DocumentReferences } from "../primitives/DocumentReferences.js";
 import type { PrincipleCatalog as PrincipleCatalogData } from "../generated/types.js";
 
@@ -33,21 +34,29 @@ export interface PrincipleCatalogProps {
    * already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function PrincipleCatalogRoot({ data, headingLevel = 1, children }: PrincipleCatalogProps) {
+function PrincipleCatalogRoot({ data, headingLevel = 1, idPrefix, children }: PrincipleCatalogProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="PrincipleCatalog" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            <Groups data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="PrincipleCatalog" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              <Groups data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -193,11 +202,12 @@ interface PrincipleViewProps {
 }
 
 function PrincipleView({ principle }: PrincipleViewProps) {
+  const idPrefix = useIdPrefix();
   return (
     <article
       data-gemara-part="principle"
       data-gemara-principle-id={principle.id ?? ""}
-      id={principle.id ? `principle-${principle.id}` : undefined}
+      id={principle.id ? `${idPrefix}principle-${principle.id}` : undefined}
     >
       <header>
         <Heading offset={2}>

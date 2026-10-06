@@ -5,6 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { RiskCatalog as RiskCatalogData } from "../generated/types.js";
 
@@ -50,21 +51,29 @@ export interface RiskCatalogProps {
    * owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function RiskCatalogRoot({ data, headingLevel = 1, children }: RiskCatalogProps) {
+function RiskCatalogRoot({ data, headingLevel = 1, idPrefix, children }: RiskCatalogProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="RiskCatalog" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            <Groups data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="RiskCatalog" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              <Groups data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -242,13 +251,14 @@ interface RiskViewProps {
 }
 
 function RiskView({ risk, refs }: RiskViewProps) {
+  const idPrefix = useIdPrefix();
   return (
     <article
       data-gemara-part="risk"
       data-gemara-risk-id={risk.id ?? ""}
       data-gemara-severity={risk.severity ?? ""}
       data-gemara-rank={risk.rank ?? undefined}
-      id={risk.id ? `risk-${risk.id}` : undefined}
+      id={risk.id ? `${idPrefix}risk-${risk.id}` : undefined}
     >
       <header>
         <Heading offset={2}>

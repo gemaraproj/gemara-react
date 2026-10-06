@@ -4,6 +4,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
+import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
 import { DocumentReferences } from "../primitives/DocumentReferences.js";
 import type { CapabilityCatalog as CapabilityCatalogData } from "../generated/types.js";
 
@@ -32,21 +33,29 @@ export interface CapabilityCatalogProps {
    * when composing into a host page that already owns the `<h1>`.
    */
   headingLevel?: number;
+  /**
+   * Prefix for the entry anchor ids (`control-<id>`, `term-<id>`, …). Set it
+   * when the same artifact renders more than once on a page so the anchors
+   * stay unique.
+   */
+  idPrefix?: string;
   children?: ReactNode;
 }
 
-function CapabilityCatalogRoot({ data, headingLevel = 1, children }: CapabilityCatalogProps) {
+function CapabilityCatalogRoot({ data, headingLevel = 1, idPrefix, children }: CapabilityCatalogProps) {
   return (
-    <HeadingScope level={headingLevel}>
-      <article data-gemara-artifact="CapabilityCatalog" data-gemara-id={data.metadata.id ?? ""}>
-        {children ?? (
-          <>
-            <Header data={data} />
-            <Groups data={data} />
-          </>
-        )}
-      </article>
-    </HeadingScope>
+    <IdPrefixScope prefix={idPrefix}>
+      <HeadingScope level={headingLevel}>
+        <article data-gemara-artifact="CapabilityCatalog" data-gemara-id={data.metadata.id ?? ""}>
+          {children ?? (
+            <>
+              <Header data={data} />
+              <Groups data={data} />
+            </>
+          )}
+        </article>
+      </HeadingScope>
+    </IdPrefixScope>
   );
 }
 
@@ -192,11 +201,12 @@ interface CapabilityViewProps {
 }
 
 function CapabilityView({ capability }: CapabilityViewProps) {
+  const idPrefix = useIdPrefix();
   return (
     <article
       data-gemara-part="capability"
       data-gemara-capability-id={capability.id ?? ""}
-      id={capability.id ? `capability-${capability.id}` : undefined}
+      id={capability.id ? `${idPrefix}capability-${capability.id}` : undefined}
     >
       <header>
         <Heading offset={2}>
