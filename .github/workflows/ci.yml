@@ -138,37 +138,3 @@ jobs:
             echo "::error::Run \`GEMARA_SPEC_DIR=/path/to/gemara npm run generate\` locally and commit the result."
             exit 1
           fi
-
-  dco:
-    name: DCO sign-off
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Verify Signed-off-by on every PR commit
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -eu
-          missing=0
-          for sha in $(git rev-list "$BASE..$HEAD"); do
-            author="$(git log -1 --format='%an <%ae>' "$sha")"
-            signoff="$(git log -1 --format=%B "$sha" | grep -i '^Signed-off-by:' || true)"
-            if [ -z "$signoff" ]; then
-              echo "::error::Commit $sha is missing Signed-off-by ($author)"
-              missing=1
-            elif ! echo "$signoff" | grep -qiF "$author"; then
-              echo "::error::Commit $sha Signed-off-by does not match author $author:"
-              echo "  $signoff"
-              missing=1
-            fi
-          done
-          if [ "$missing" -ne 0 ]; then
-            echo "::error::Add 'Signed-off-by: Name <email>' or use 'git commit -s'."
-            exit 1
-          fi
-          echo "All commits have valid DCO sign-off."

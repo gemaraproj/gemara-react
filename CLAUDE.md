@@ -94,7 +94,7 @@ If a consumer eventually needs rich formatting, there are two clean seams: swap 
 
 ## Conventions worth noting
 
-- All commits must be DCO-signed (`git commit -s`). CI's `dco` job verifies `Signed-off-by:` on every PR commit and matches it against the commit author.
+- All commits must be DCO-signed (`git commit -s`). The DCO GitHub App (installed on the org) checks `Signed-off-by:` on every PR commit and is a required status check on `main`; it skips bot authors and merge commits.
 - Never commit `dist/` or `src/generated/openapi.yaml` (the latter isn't generated here, but don't import one into the tree). `src/generated/types.ts` *is* committed and CI enforces it matches the spec.
 - `"use client"` is stripped by tsup/rollup during bundling. If a new interactive component lands outside `src/interactive/`, extend `injectUseClient` in `tsup.config.ts` to cover it.
 - `noUncheckedIndexedAccess` is on — array element accesses return `T | undefined`. The narrowed catalog types (`ControlCatalog`, `GuidanceCatalog`) and their use of `NonNullable<...>[number]` rely on this; preserve the `?? []` / `??` defaulting patterns when adding new fields.
