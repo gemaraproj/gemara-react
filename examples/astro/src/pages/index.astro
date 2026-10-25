@@ -1,7 +1,6 @@
 ---
 import { readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { ControlCatalog } from "@gemara/react/control-catalog";
 import { GuidanceCatalog } from "@gemara/react/guidance-catalog";
@@ -30,8 +29,9 @@ import aigfProfile from "../fixtures/good-aigf.oscal-profile.json?raw";
 
 // Load fixtures from the canonical gemara repo at build time. In a real app
 // these would come from the hub API or a content collection.
-const here = dirname(fileURLToPath(import.meta.url));
-const fixtureDir = resolve(here, "..", "..", "..", "..", "..", "gemara", "test", "test-data");
+// Resolve from the build's working directory (examples/astro), not
+// import.meta.url, which points at a bundled chunk whose depth varies by Astro version.
+const fixtureDir = resolve(process.cwd(), "..", "..", "..", "gemara", "test", "test-data");
 
 function loadFixture(name: string) {
   const raw = readFileSync(resolve(fixtureDir, name), "utf8");
