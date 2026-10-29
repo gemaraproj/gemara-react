@@ -10,7 +10,7 @@
     "a11y": "pa11y-ci --config .pa11yci.json file://$PWD/dist/index.html"
   },
   "dependencies": {
-    "@astrojs/react": "^4.1.0",
+    "@astrojs/react": "^7.1.1",
     "@gemara/react": "file:../..",
     "astro": "^7.4.2",
     "react": "^18.3.1",
