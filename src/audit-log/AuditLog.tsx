@@ -6,7 +6,7 @@ import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
 import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
-import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type {
   AuditLog as AuditLogData,
   MultiEntryMapping,
@@ -166,7 +166,12 @@ function Header({ data }: PartProps) {
                   metadata.lexicon["reference-id"],
                 )}
                 relation="lexicon"
-              />
+              >
+                {mappingReferenceTitle(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
+              </ArtifactRef>
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
             </dd>
           </>
@@ -323,7 +328,9 @@ function Criteria({ data }: PartProps) {
                 c["reference-id"],
               )}
               relation="criteria"
-            />
+            >
+              {mappingReferenceTitle(data.metadata["mapping-references"], c["reference-id"])}
+            </ArtifactRef>
             {c.remarks ? <> — {c.remarks}</> : null}
           </li>
         ))}
@@ -343,7 +350,7 @@ function Results({ data }: PartProps) {
         <ol data-gemara-part="result-list">
           {results.map((r) => (
             <li key={r.id}>
-              <ResultView result={r} />
+              <ResultView result={r} refs={data.metadata["mapping-references"]} />
             </li>
           ))}
         </ol>
@@ -354,9 +361,10 @@ function Results({ data }: PartProps) {
 
 interface ResultViewProps {
   result: AuditResult;
+  refs?: Schemas["MappingReference"][];
 }
 
-function ResultView({ result }: ResultViewProps) {
+function ResultView({ result, refs }: ResultViewProps) {
   const idPrefix = useIdPrefix();
   return (
     <article
@@ -390,7 +398,7 @@ function ResultView({ result }: ResultViewProps) {
       ) : null}
       {result["criteria-reference"] ? (
         <References>
-          <Mappings label="Criteria" mappings={[result["criteria-reference"]]} />
+          <Mappings label="Criteria" mappings={[result["criteria-reference"]]} refs={refs} />
         </References>
       ) : null}
     </article>
@@ -487,16 +495,17 @@ function References({ children }: { children: ReactNode }) {
 interface MappingsProps {
   label: string;
   mappings: MultiEntryMapping[];
+  refs?: Schemas["MappingReference"][];
 }
 
-function Mappings({ label, mappings }: MappingsProps) {
+function Mappings({ label, mappings, refs }: MappingsProps) {
   return (
     <section data-gemara-part="mappings" data-gemara-mappings-label={label.toLowerCase()}>
       <Heading offset={3}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
-          <li key={`${m["reference-id"] ?? "ref"}-${i}`}>
-            <strong>{m["reference-id"]}</strong>
+          <li key={`${m["reference-id"] ?? "ref"}-${i}`} data-gemara-reference-id={m["reference-id"]}>
+            <strong>{mappingReferenceTitle(refs, m["reference-id"])}</strong>
             {m.remarks ? <> — {m.remarks}</> : null}
             {m.entries && m.entries.length > 0 ? (
               <ul>

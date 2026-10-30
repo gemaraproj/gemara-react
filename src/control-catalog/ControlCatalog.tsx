@@ -6,7 +6,7 @@ import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
 import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
-import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { DocumentReferences, mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { ControlCatalog as ControlCatalogData } from "../generated/types.js";
 
 type MappingReference = NonNullable<ControlCatalogData["metadata"]["mapping-references"]>[number];
@@ -246,15 +246,12 @@ function ControlView({ control, refs }: ControlViewProps) {
       {control["assessment-requirements"] && control["assessment-requirements"].length > 0 ? (
         <RequirementList requirements={control["assessment-requirements"]} />
       ) : null}
-      {(control.guidelines && control.guidelines.length > 0) ||
-      (control.threats && control.threats.length > 0) ? (
+      {control.threats && control.threats.length > 0 ? (
+        <Mappings label="Threats" mappings={control.threats} refs={refs} />
+      ) : null}
+      {control.guidelines && control.guidelines.length > 0 ? (
         <References>
-          {control.guidelines && control.guidelines.length > 0 ? (
-            <Mappings label="Guidelines" mappings={control.guidelines} refs={refs} />
-          ) : null}
-          {control.threats && control.threats.length > 0 ? (
-            <Mappings label="Threats" mappings={control.threats} refs={refs} />
-          ) : null}
+          <Mappings label="Guidelines" mappings={control.guidelines} refs={refs} />
         </References>
       ) : null}
     </article>
@@ -312,8 +309,8 @@ function Mappings({ label, mappings, refs }: MappingsProps) {
       <Heading offset={3}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
-          <li key={`${m["reference-id"] ?? "ref"}-${i}`}>
-            <strong>{m["reference-id"]}</strong>
+          <li key={`${m["reference-id"] ?? "ref"}-${i}`} data-gemara-reference-id={m["reference-id"]}>
+            <strong>{mappingReferenceTitle(refs, m["reference-id"])}</strong>
             {m.entries && m.entries.length > 0 ? (
               <ul>
                 {m.entries.map((e, j) => {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import type { ReactNode } from "react";
 import { ArtifactRef } from "../primitives/ArtifactRef.js";
-import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
@@ -177,7 +177,7 @@ function Header({ data }: PartProps) {
                 url={mappingReferenceUrl(data.metadata["mapping-references"], lexicon["reference-id"])}
                 relation="lexicon"
               >
-                {lexicon["reference-id"]}
+                {mappingReferenceTitle(data.metadata["mapping-references"], lexicon["reference-id"])}
               </ArtifactRef>
               {lexicon.remarks ? <> — {lexicon.remarks}</> : null}
             </dd>
