@@ -408,7 +408,9 @@ function PolicyImportView({ imp, refs }: PolicyImportViewProps) {
         id={imp["reference-id"] ?? ""}
         url={mappingReferenceUrl(refs, imp["reference-id"])}
         relation="imports"
-      />
+      >
+        {mappingReferenceTitle(refs, imp["reference-id"])}
+      </ArtifactRef>
       {imp.remarks ? <> — {imp.remarks}</> : null}
     </li>
   );
@@ -429,7 +431,9 @@ function CatalogImportView({ imp, refs }: CatalogImportViewProps) {
           id={referenceId ?? ""}
           url={mappingReferenceUrl(refs, referenceId)}
           relation="imports"
-        />
+        >
+          {mappingReferenceTitle(refs, referenceId)}
+        </ArtifactRef>
       </Heading>
       <Exclusions exclusions={imp.exclusions ?? []} />
       <ConstraintList constraints={imp.constraints ?? []} referenceId={referenceId} />
@@ -456,7 +460,9 @@ function GuidanceImportView({ imp, refs }: GuidanceImportViewProps) {
           id={referenceId ?? ""}
           url={mappingReferenceUrl(refs, referenceId)}
           relation="imports"
-        />
+        >
+          {mappingReferenceTitle(refs, referenceId)}
+        </ArtifactRef>
       </Heading>
       <Exclusions exclusions={imp.exclusions ?? []} />
       <ConstraintList constraints={imp.constraints ?? []} referenceId={referenceId} />

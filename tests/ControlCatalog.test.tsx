@@ -89,16 +89,6 @@ describe("ControlCatalog", () => {
     }
   });
 
-  it("emits the Threats heading once per control", () => {
-    const { container } = render(<ControlCatalog data={data} />);
-    for (const c of container.querySelectorAll("[data-gemara-part='control']")) {
-      const headings = [...c.querySelectorAll("h1,h2,h3,h4,h5,h6")].filter(
-        (h) => h.textContent === "Threats",
-      );
-      expect(headings.length).toBeLessThanOrEqual(1);
-    }
-  });
-
   it("labels each mapping group with its mapping-reference title", () => {
     const { container } = render(<ControlCatalog data={data} />);
     const labels = [

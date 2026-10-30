@@ -390,7 +390,7 @@ function Mappings({ label, mappings, refs }: MappingsProps) {
       <Heading offset={3}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
-          <li key={`${m["reference-id"] ?? "ref"}-${i}`}>
+          <li key={`${m["reference-id"] ?? "ref"}-${i}`} data-gemara-reference-id={m["reference-id"]}>
             <strong>{mappingReferenceTitle(refs, m["reference-id"])}</strong>
             {m.remarks ? <> — {m.remarks}</> : null}
             {m.entries && m.entries.length > 0 ? (

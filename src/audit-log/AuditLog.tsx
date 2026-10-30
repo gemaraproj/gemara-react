@@ -166,7 +166,12 @@ function Header({ data }: PartProps) {
                   metadata.lexicon["reference-id"],
                 )}
                 relation="lexicon"
-              />
+              >
+                {mappingReferenceTitle(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
+              </ArtifactRef>
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
             </dd>
           </>
@@ -323,7 +328,9 @@ function Criteria({ data }: PartProps) {
                 c["reference-id"],
               )}
               relation="criteria"
-            />
+            >
+              {mappingReferenceTitle(data.metadata["mapping-references"], c["reference-id"])}
+            </ArtifactRef>
             {c.remarks ? <> — {c.remarks}</> : null}
           </li>
         ))}
@@ -497,7 +504,7 @@ function Mappings({ label, mappings, refs }: MappingsProps) {
       <Heading offset={3}>{label}</Heading>
       <ul>
         {mappings.map((m, i) => (
-          <li key={`${m["reference-id"] ?? "ref"}-${i}`}>
+          <li key={`${m["reference-id"] ?? "ref"}-${i}`} data-gemara-reference-id={m["reference-id"]}>
             <strong>{mappingReferenceTitle(refs, m["reference-id"])}</strong>
             {m.remarks ? <> — {m.remarks}</> : null}
             {m.entries && m.entries.length > 0 ? (

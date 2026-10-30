@@ -10,14 +10,22 @@ import { AuditLog } from "../src/audit-log/index.js";
 import { EnforcementLog } from "../src/enforcement-log/index.js";
 import { Lexicon } from "../src/lexicon/index.js";
 import { MappingDocument } from "../src/mapping-document/index.js";
+import { GuidanceCatalog } from "../src/guidance-catalog/index.js";
+import { ThreatCatalog } from "../src/threat-catalog/index.js";
+import { RiskCatalog } from "../src/risk-catalog/index.js";
+import { Policy } from "../src/policy/index.js";
 import { GemaraProvider, type ArtifactReference } from "../src/provider/index.js";
 import {
   isAuditLog,
   isControlCatalog,
   isEnforcementLog,
   isEvaluationLog,
+  isGuidanceCatalog,
   isLexicon,
   isMappingDocument,
+  isPolicy,
+  isRiskCatalog,
+  isThreatCatalog,
 } from "../src/generated/types.js";
 import type {
   ControlCatalog as ControlCatalogData,
@@ -43,6 +51,14 @@ const lexicon = load("good-lexicon.yaml");
 if (!isLexicon(lexicon)) throw new Error("Fixture is not a Lexicon");
 const mappingDoc = load("good-mapping-document.yaml");
 if (!isMappingDocument(mappingDoc)) throw new Error("Fixture is not a MappingDocument");
+const guidance = load("good-aigf.yaml");
+if (!isGuidanceCatalog(guidance)) throw new Error("Fixture is not a GuidanceCatalog");
+const threats = load("good-threat-catalog.yaml");
+if (!isThreatCatalog(threats)) throw new Error("Fixture is not a ThreatCatalog");
+const risks = load("good-risk-catalog.yaml");
+if (!isRiskCatalog(risks)) throw new Error("Fixture is not a RiskCatalog");
+const policy = load("good-policy.yaml");
+if (!isPolicy(policy)) throw new Error("Fixture is not a Policy");
 
 const URL = "https://example.com/csf.yaml";
 const LEX = { id: "LEX-1", title: "Lexicon", version: "1", url: URL };
@@ -120,9 +136,48 @@ describe("DocumentReferences", () => {
   it.each([
     ["Lexicon", () => <Lexicon data={withLexicon(lexicon)} />],
     ["MappingDocument", () => <MappingDocument data={withLexicon(mappingDoc)} />],
+    ["Policy", () => <Policy data={withLexicon(policy)} />],
+    ["AuditLog", () => <AuditLog data={withLexicon(auditLog)} />],
+    ["EvaluationLog", () => <EvaluationLog data={withLexicon(evalLog)} />],
+    ["EnforcementLog", () => <EnforcementLog data={withLexicon(enforcementLog)} />],
   ])("labels the %s metadata lexicon ref with its title", (_name, renderIt) => {
     const { container } = render(renderIt());
     expect(container.querySelector(`[data-gemara-ref-id='${LEX.id}']`)?.textContent).toBe(LEX.title);
+  });
+
+  it.each([
+    ["ControlCatalog", ccc.metadata, () => <ControlCatalog data={ccc} />],
+    ["GuidanceCatalog", guidance.metadata, () => <GuidanceCatalog data={guidance} />],
+    ["ThreatCatalog", threats.metadata, () => <ThreatCatalog data={threats} />],
+    ["RiskCatalog", risks.metadata, () => <RiskCatalog data={risks} />],
+  ])("labels %s mapping groups with their title and keeps the reference-id", (_name, metadata, renderIt) => {
+    const { container } = render(renderIt());
+    const groups = [
+      ...container.querySelectorAll("[data-gemara-part='mappings'] > ul > li[data-gemara-reference-id]"),
+    ];
+    expect(groups.length).toBeGreaterThan(0);
+    for (const li of groups) {
+      const id = li.getAttribute("data-gemara-reference-id");
+      const title = metadata["mapping-references"]?.find((r) => r.id === id)?.title || id;
+      expect(li.querySelector(":scope > strong")?.textContent).toBe(title);
+    }
+  });
+
+  it("labels Policy imports with their mapping-reference title", () => {
+    const { container } = render(<Policy data={policy} />);
+    const labels = [...container.querySelectorAll("[data-gemara-part='import'] [data-gemara-ref='artifact']")].map(
+      (el) => el.textContent,
+    );
+    expect(labels).toContain("NIST Special Publication 800-53");
+    expect(labels).not.toContain("NIST-800-53");
+  });
+
+  it("labels the AuditLog Criteria list with mapping-reference titles", () => {
+    const { container } = render(<AuditLog data={auditLog} />);
+    const labels = [...container.querySelectorAll("[data-gemara-part='criterion'] [data-gemara-ref='artifact']")].map(
+      (el) => el.textContent,
+    );
+    expect(labels).toEqual(["Information Security Policy", "Open Source Project Security Baseline"]);
   });
 
   it("renders nothing when the document declares no references", () => {

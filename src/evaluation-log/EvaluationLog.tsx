@@ -5,7 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
-import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { EvaluationLog as EvaluationLogData } from "../generated/types.js";
 
 type MappingReference = NonNullable<EvaluationLogData["metadata"]["mapping-references"]>[number];
@@ -143,7 +143,12 @@ function Header({ data }: WithDataProps) {
                   metadata.lexicon["reference-id"],
                 )}
                 relation="lexicon"
-              />
+              >
+                {mappingReferenceTitle(
+                  metadata["mapping-references"],
+                  metadata.lexicon["reference-id"],
+                )}
+              </ArtifactRef>
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
             </dd>
           </>
