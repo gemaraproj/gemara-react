@@ -12,6 +12,15 @@ export function mappingReferenceUrl(
   return refs?.find((r) => r.id === id)?.url;
 }
 
+/** Resolve a reference-id to its `metadata["mapping-references"]` title, falling back to the id. */
+export function mappingReferenceTitle(
+  refs: Schemas["MappingReference"][] | undefined,
+  id: string | undefined,
+): string | undefined {
+  if (!id) return undefined;
+  return refs?.find((r) => r.id === id)?.title || id;
+}
+
 export interface DocumentReferencesProps {
   data: {
     metadata: Pick<Metadata, "lexicon" | "mapping-references">;
@@ -53,7 +62,9 @@ export function DocumentReferences({ data }: DocumentReferencesProps) {
             id={metadata.lexicon["reference-id"] ?? ""}
             url={mappingReferenceUrl(refs, metadata.lexicon["reference-id"])}
             relation="lexicon"
-          />
+          >
+            {mappingReferenceTitle(refs, metadata.lexicon["reference-id"])}
+          </ArtifactRef>
           {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
         </p>
       ) : null}
@@ -70,7 +81,9 @@ export function DocumentReferences({ data }: DocumentReferencesProps) {
                 id={e["reference-id"]}
                 url={mappingReferenceUrl(refs, e["reference-id"])}
                 relation="extends"
-              />
+              >
+                {mappingReferenceTitle(refs, e["reference-id"])}
+              </ArtifactRef>
               {e.remarks ? <> — {e.remarks}</> : null}
             </li>
           ))}
@@ -89,7 +102,9 @@ export function DocumentReferences({ data }: DocumentReferencesProps) {
                 id={imp["reference-id"] ?? ""}
                 url={mappingReferenceUrl(refs, imp["reference-id"])}
                 relation="imports"
-              />
+              >
+                {mappingReferenceTitle(refs, imp["reference-id"])}
+              </ArtifactRef>
               {imp.remarks ? <> — {imp.remarks}</> : null}
               {imp.entries && imp.entries.length > 0 ? (
                 <ul data-gemara-part="import-entries">

@@ -6,7 +6,7 @@ import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
 import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
-import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { Lexicon as LexiconData } from "../generated/types.js";
 
 /**
@@ -130,7 +130,7 @@ function Header({ data }: HeaderProps) {
                 )}
                 relation="lexicon"
               >
-                {metadata.lexicon["reference-id"]}
+                {mappingReferenceTitle(metadata["mapping-references"], metadata.lexicon["reference-id"])}
               </ArtifactRef>
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
             </dd>

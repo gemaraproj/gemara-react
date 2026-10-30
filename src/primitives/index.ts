@@ -5,6 +5,7 @@ export { DateTime, type DateTimeProps } from "./DateTime.js";
 export { Prose, type ProseProps } from "./Prose.js";
 export {
   DocumentReferences,
+  mappingReferenceTitle,
   mappingReferenceUrl,
   type DocumentReferencesProps,
 } from "./DocumentReferences.js";

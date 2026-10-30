@@ -5,7 +5,7 @@ import { DateTime } from "../primitives/DateTime.js";
 import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
-import { mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type {
   Policy as PolicyData,
   SchemaMappingReference,
@@ -166,7 +166,7 @@ function Header({ data }: PartProps) {
                 url={mappingReferenceUrl(refs, metadata.lexicon["reference-id"])}
                 relation="lexicon"
               >
-                {metadata.lexicon["reference-id"]}
+                {mappingReferenceTitle(refs, metadata.lexicon["reference-id"])}
               </ArtifactRef>
               {metadata.lexicon.remarks ? <> — {metadata.lexicon.remarks}</> : null}
             </dd>

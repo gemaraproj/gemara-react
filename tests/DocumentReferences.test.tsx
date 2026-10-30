@@ -109,6 +109,22 @@ describe("DocumentReferences", () => {
     ).not.toBeNull();
   });
 
+  it("labels artifact-level refs with their mapping-reference title", () => {
+    const { container } = render(<ControlCatalog data={catalog} />);
+    const title = "NIST Cybersecurity Framework";
+    expect(container.querySelector("[data-gemara-part='lexicon'] a")?.textContent).toBe(title);
+    expect(container.querySelector("[data-gemara-part='extends-ref'] a")?.textContent).toBe(title);
+    expect(container.querySelector("[data-gemara-part='import'] > a")?.textContent).toBe(title);
+  });
+
+  it.each([
+    ["Lexicon", () => <Lexicon data={withLexicon(lexicon)} />],
+    ["MappingDocument", () => <MappingDocument data={withLexicon(mappingDoc)} />],
+  ])("labels the %s metadata lexicon ref with its title", (_name, renderIt) => {
+    const { container } = render(renderIt());
+    expect(container.querySelector(`[data-gemara-ref-id='${LEX.id}']`)?.textContent).toBe(LEX.title);
+  });
+
   it("renders nothing when the document declares no references", () => {
     const bare: ControlCatalogData = {
       ...ccc,
@@ -160,6 +176,13 @@ describe("DocumentReferences", () => {
     expect(
       container.querySelector(`[data-gemara-part='control'] a[href='${URL}'][data-gemara-ref='entry']`),
     ).not.toBeNull();
+  });
+
+  it("labels AuditLog result criteria mappings with their mapping-reference title", () => {
+    const { container } = render(<AuditLog data={auditLog} />);
+    expect(
+      container.querySelector("[data-gemara-mappings-label='criteria'] > ul > li > strong")?.textContent,
+    ).toBe("Open Source Project Security Baseline");
   });
 
   it("resolves the AuditLog criteria url", () => {

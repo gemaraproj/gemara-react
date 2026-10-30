@@ -6,7 +6,7 @@ import { EntityRef } from "../primitives/EntityRef.js";
 import { Prose } from "../primitives/Prose.js";
 import { Heading, HeadingScope } from "../primitives/Heading.js";
 import { IdPrefixScope, useIdPrefix } from "../primitives/IdPrefix.js";
-import { DocumentReferences, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
+import { DocumentReferences, mappingReferenceTitle, mappingReferenceUrl } from "../primitives/DocumentReferences.js";
 import type { GuidanceCatalog as GuidanceCatalogData } from "../generated/types.js";
 
 type MappingReference = NonNullable<GuidanceCatalogData["metadata"]["mapping-references"]>[number];
@@ -420,7 +420,7 @@ function Mappings({ label, mappings, refs, offset = 3 }: MappingsProps) {
       <ul>
         {mappings.map((m, i) => (
           <li key={`${m["reference-id"] ?? "ref"}-${i}`}>
-            <strong>{m["reference-id"]}</strong>
+            <strong>{mappingReferenceTitle(refs, m["reference-id"])}</strong>
             {m.entries && m.entries.length > 0 ? (
               <ul>
                 {m.entries.map((e, j) => {

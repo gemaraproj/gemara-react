@@ -79,7 +79,44 @@ describe("ControlCatalog", () => {
     }
   });
 
-  it("groups guideline and threat mappings in a collapsed References section", () => {
+  it("shows threat mappings in plain view, outside the collapsed References section", () => {
+    const { container } = render(<ControlCatalog data={data} />);
+    const threatSections = container.querySelectorAll("[data-gemara-mappings-label='threats']");
+    expect(threatSections.length).toBeGreaterThan(0);
+    for (const s of threatSections) {
+      expect(s.closest("details")).toBeNull();
+      expect(s.closest("[data-gemara-part='control']")).not.toBeNull();
+    }
+  });
+
+  it("emits the Threats heading once per control", () => {
+    const { container } = render(<ControlCatalog data={data} />);
+    for (const c of container.querySelectorAll("[data-gemara-part='control']")) {
+      const headings = [...c.querySelectorAll("h1,h2,h3,h4,h5,h6")].filter(
+        (h) => h.textContent === "Threats",
+      );
+      expect(headings.length).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("labels each mapping group with its mapping-reference title", () => {
+    const { container } = render(<ControlCatalog data={data} />);
+    const labels = [
+      ...container.querySelectorAll("[data-gemara-mappings-label='threats'] > ul > li > strong"),
+    ].map((el) => el.textContent);
+    expect(labels.length).toBeGreaterThan(0);
+    expect(labels.every((l) => l === "FINOS Common Cloud Controls Threats")).toBe(true);
+  });
+
+  it("falls back to the reference id when no mapping-reference declares it", () => {
+    const control = { ...data.controls![0]!, threats: [{ "reference-id": "QA.TH", entries: [{ "reference-id": "QA.TH01" }] }] };
+    const { container } = render(<ControlCatalog data={{ ...data, controls: [control] }} />);
+    expect(
+      container.querySelector("[data-gemara-mappings-label='threats'] > ul > li > strong")?.textContent,
+    ).toBe("QA.TH");
+  });
+
+  it("groups guideline mappings in a collapsed References section", () => {
     const { container } = render(<ControlCatalog data={data} />);
     const details = container.querySelector(
       "details[data-gemara-part='references']",
