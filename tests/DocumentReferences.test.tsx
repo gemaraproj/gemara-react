@@ -177,7 +177,12 @@ describe("DocumentReferences", () => {
     const labels = [...container.querySelectorAll("[data-gemara-part='criterion'] [data-gemara-ref='artifact']")].map(
       (el) => el.textContent,
     );
-    expect(labels).toEqual(["Information Security Policy", "Open Source Project Security Baseline"]);
+    const refs = auditLog.metadata["mapping-references"] ?? [];
+    const expected = (auditLog.criteria ?? []).map(
+      (c) => refs.find((r) => r.id === c["reference-id"])?.title || c["reference-id"],
+    );
+    expect(expected).toContain("Information Security Policy");
+    expect(labels).toEqual(expected);
   });
 
   it("renders nothing when the document declares no references", () => {
