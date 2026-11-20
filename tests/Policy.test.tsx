@@ -454,6 +454,20 @@ describe("Policy optional sections", () => {
     ).toBe("legacy-mainframe");
   });
 
+  it("labels risk references by their mapping-reference title", () => {
+    const titled: PolicyData = {
+      ...full,
+      metadata: {
+        ...full.metadata,
+        "mapping-references": [{ id: "RISK-CAT", title: "Org Risk Catalog", version: "1.0.0" }],
+      },
+    };
+    const { container } = render(<Policy data={titled} />);
+    const refs = container.querySelectorAll("[data-gemara-part='risk-reference']");
+    expect(refs.length).toBe(2);
+    for (const r of refs) expect(r.textContent).toBe("(Org Risk Catalog)");
+  });
+
   it("renders assessment plans with methods and parameters", () => {
     const { container } = render(<Policy data={full} />);
     const plans = container.querySelector("[data-gemara-part='assessment-plans']");

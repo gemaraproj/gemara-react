@@ -642,9 +642,10 @@ function TimelineView({ label, variant, details }: TimelineViewProps) {
 interface RiskRefProps {
   mapping: RiskMapping;
   relation: string;
+  refs: SchemaMappingReference[];
 }
 
-function RiskRef({ mapping, relation }: RiskRefProps) {
+function RiskRef({ mapping, relation, refs }: RiskRefProps) {
   return (
     <>
       <ArtifactRef
@@ -659,7 +660,7 @@ function RiskRef({ mapping, relation }: RiskRefProps) {
         <>
           {" "}
           <span data-gemara-part="risk-reference">
-            ({mapping["reference-id"]})
+            ({mappingReferenceTitle(refs, mapping["reference-id"])})
           </span>
         </>
       ) : null}
@@ -673,6 +674,7 @@ function RisksSection({ data }: PartProps) {
   if (!risks) return null;
   const mitigated = risks.mitigated ?? [];
   const accepted = risks.accepted ?? [];
+  const refs = data.metadata["mapping-references"] ?? [];
   return (
     <section data-gemara-part="risks">
       <Heading offset={1}>Risks</Heading>
@@ -681,7 +683,7 @@ function RisksSection({ data }: PartProps) {
           <Heading offset={2}>Mitigated</Heading>
           <ul>
             {mitigated.map((r) => (
-              <MitigatedRiskView key={r.id} risk={r} />
+              <MitigatedRiskView key={r.id} risk={r} refs={refs} />
             ))}
           </ul>
         </section>
@@ -691,7 +693,7 @@ function RisksSection({ data }: PartProps) {
           <Heading offset={2}>Accepted</Heading>
           <ul>
             {accepted.map((r) => (
-              <AcceptedRiskView key={r.id} risk={r} />
+              <AcceptedRiskView key={r.id} risk={r} refs={refs} />
             ))}
           </ul>
         </section>
@@ -700,20 +702,20 @@ function RisksSection({ data }: PartProps) {
   );
 }
 
-function MitigatedRiskView({ risk }: { risk: MitigatedRisk }) {
+function MitigatedRiskView({ risk, refs }: { risk: MitigatedRisk; refs: SchemaMappingReference[] }) {
   return (
     <li data-gemara-part="risk" data-gemara-risk-id={risk.id ?? ""}>
       <strong data-gemara-part="risk-id">{risk.id}</strong>{" "}
-      {risk.risk ? <RiskRef mapping={risk.risk} relation="mitigated-risk" /> : null}
+      {risk.risk ? <RiskRef mapping={risk.risk} relation="mitigated-risk" refs={refs} /> : null}
     </li>
   );
 }
 
-function AcceptedRiskView({ risk }: { risk: AcceptedRisk }) {
+function AcceptedRiskView({ risk, refs }: { risk: AcceptedRisk; refs: SchemaMappingReference[] }) {
   return (
     <li data-gemara-part="risk" data-gemara-risk-id={risk.id ?? ""}>
       <strong data-gemara-part="risk-id">{risk.id}</strong>{" "}
-      {risk.risk ? <RiskRef mapping={risk.risk} relation="accepted-risk" /> : null}
+      {risk.risk ? <RiskRef mapping={risk.risk} relation="accepted-risk" refs={refs} /> : null}
       {risk["target-id"] ? (
         <p data-gemara-part="risk-target">
           Covers mitigated risk{" "}
