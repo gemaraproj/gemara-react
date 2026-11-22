@@ -204,6 +204,20 @@ describe("EnforcementLog", () => {
     }
   });
 
+  it("labels entry and exception references by their mapping-reference title", () => {
+    const { container } = render(<EnforcementLog data={data} />);
+    const titles = new Map(fixtureMappingReferences(data).map((r) => [r.id, r.title]));
+    const method = container.querySelector("[data-gemara-part='action-method']");
+    const methodRef = data.actions?.[0]?.method?.["reference-id"];
+    expect(methodRef).toBeTruthy();
+    expect(method?.textContent).toContain(`(${titles.get(methodRef!)})`);
+    expect(method?.textContent).not.toContain(`(${methodRef})`);
+    const requirement = container.querySelector("[data-gemara-part='assessment-requirement']");
+    expect(requirement?.textContent).toContain(`(${titles.get("OSPS")})`);
+    const exception = container.querySelector("[data-gemara-part='exception']");
+    expect(exception?.textContent).toContain(titles.get("exception-register"));
+  });
+
   it("renders metadata mapping-references in a collapsed References section", () => {
     const { container } = render(<EnforcementLog data={data} />);
     const refs = fixtureMappingReferences(data);

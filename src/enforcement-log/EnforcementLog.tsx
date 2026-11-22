@@ -286,7 +286,7 @@ function Actions({ data }: SectionProps) {
         <ol data-gemara-part="action-list">
           {actions.map((a, i) => (
             <li key={`${a.method?.["entry-id"] ?? "action"}-${i}`}>
-              <ActionView action={a} />
+              <ActionView action={a} refs={data.metadata["mapping-references"]} />
             </li>
           ))}
         </ol>
@@ -297,9 +297,11 @@ function Actions({ data }: SectionProps) {
 
 interface ActionViewProps {
   action: ActionResult;
+  /** `metadata["mapping-references"]`, used to label reference-ids by title. */
+  refs?: MappingReference[];
 }
 
-function ActionView({ action }: ActionViewProps) {
+function ActionView({ action, refs }: ActionViewProps) {
   const steps = action.steps ?? [];
   return (
     <article
@@ -321,7 +323,7 @@ function ActionView({ action }: ActionViewProps) {
           <>
             <dt>Method</dt>
             <dd data-gemara-part="action-method">
-              <EntryRef mapping={action.method} relation="method" />
+              <EntryRef mapping={action.method} relation="method" refs={refs} />
             </dd>
           </>
         ) : null}
@@ -355,7 +357,7 @@ function ActionView({ action }: ActionViewProps) {
         </section>
       ) : null}
       {action.justification ? (
-        <JustificationView justification={action.justification} />
+        <JustificationView justification={action.justification} refs={refs} />
       ) : null}
     </article>
   );
@@ -363,9 +365,10 @@ function ActionView({ action }: ActionViewProps) {
 
 interface JustificationViewProps {
   justification: Justification;
+  refs?: MappingReference[];
 }
 
-function JustificationView({ justification }: JustificationViewProps) {
+function JustificationView({ justification, refs }: JustificationViewProps) {
   const assessments = justification.assessments ?? [];
   const exceptions = justification.exceptions ?? [];
   return (
@@ -374,7 +377,7 @@ function JustificationView({ justification }: JustificationViewProps) {
       {assessments.length > 0 ? (
         <ul data-gemara-part="assessments">
           {assessments.map((f, i) => (
-            <AssessmentFindingView key={i} finding={f} />
+            <AssessmentFindingView key={i} finding={f} refs={refs} />
           ))}
         </ul>
       ) : null}
@@ -383,7 +386,11 @@ function JustificationView({ justification }: JustificationViewProps) {
           <Heading offset={4}>Exceptions</Heading>
           <ul>
             {exceptions.map((e, i) => (
-              <ExceptionView key={`${e["reference-id"] ?? "exception"}-${i}`} exception={e} />
+              <ExceptionView
+                key={`${e["reference-id"] ?? "exception"}-${i}`}
+                exception={e}
+                refs={refs}
+              />
             ))}
           </ul>
         </section>
@@ -394,9 +401,10 @@ function JustificationView({ justification }: JustificationViewProps) {
 
 interface AssessmentFindingViewProps {
   finding: AssessmentFinding;
+  refs?: MappingReference[];
 }
 
-function AssessmentFindingView({ finding }: AssessmentFindingViewProps) {
+function AssessmentFindingView({ finding, refs }: AssessmentFindingViewProps) {
   return (
     <li data-gemara-part="assessment" data-gemara-result={finding.result ?? ""}>
       <span data-gemara-part="assessment-result">{finding.result}</span>
@@ -405,7 +413,7 @@ function AssessmentFindingView({ finding }: AssessmentFindingViewProps) {
           <>
             <dt>Requirement</dt>
             <dd data-gemara-part="assessment-requirement">
-              <EntryRef mapping={finding.requirement} relation="requirement" />
+              <EntryRef mapping={finding.requirement} relation="requirement" refs={refs} />
             </dd>
           </>
         ) : null}
@@ -413,7 +421,7 @@ function AssessmentFindingView({ finding }: AssessmentFindingViewProps) {
           <>
             <dt>Plan</dt>
             <dd data-gemara-part="assessment-plan">
-              <EntryRef mapping={finding.plan} relation="plan" />
+              <EntryRef mapping={finding.plan} relation="plan" refs={refs} />
             </dd>
           </>
         ) : null}
@@ -421,7 +429,7 @@ function AssessmentFindingView({ finding }: AssessmentFindingViewProps) {
           <>
             <dt>Log</dt>
             <dd data-gemara-part="assessment-log">
-              <EntryRef mapping={finding.log} relation="log" />
+              <EntryRef mapping={finding.log} relation="log" refs={refs} />
             </dd>
           </>
         ) : null}
@@ -432,16 +440,20 @@ function AssessmentFindingView({ finding }: AssessmentFindingViewProps) {
 
 interface ExceptionViewProps {
   exception: ArtifactMapping;
+  refs?: MappingReference[];
 }
 
-function ExceptionView({ exception }: ExceptionViewProps) {
+function ExceptionView({ exception, refs }: ExceptionViewProps) {
   return (
     <li data-gemara-part="exception">
       <ArtifactRef
         kind="mapping-reference"
         id={exception["reference-id"] ?? ""}
+        url={mappingReferenceUrl(refs, exception["reference-id"])}
         relation="exception"
-      />
+      >
+        {mappingReferenceTitle(refs, exception["reference-id"])}
+      </ArtifactRef>
       {exception.remarks ? <Prose content={exception.remarks} as="p" /> : null}
     </li>
   );
@@ -450,13 +462,14 @@ function ExceptionView({ exception }: ExceptionViewProps) {
 interface EntryRefProps {
   mapping: EntryMapping;
   relation: string;
+  refs?: MappingReference[];
 }
 
 /**
  * Inline EntryMapping: entry-id resolved via the link resolver, with the
- * parent reference-id rendered after it for context.
+ * parent reference's title (from mapping-references) rendered after it.
  */
-function EntryRef({ mapping, relation }: EntryRefProps) {
+function EntryRef({ mapping, relation, refs }: EntryRefProps) {
   return (
     <>
       <ArtifactRef
@@ -467,7 +480,9 @@ function EntryRef({ mapping, relation }: EntryRefProps) {
       >
         {mapping["entry-id"]}
       </ArtifactRef>
-      {mapping["reference-id"] ? <> ({mapping["reference-id"]})</> : null}
+      {mapping["reference-id"] ? (
+        <> ({mappingReferenceTitle(refs, mapping["reference-id"])})</>
+      ) : null}
     </>
   );
 }
