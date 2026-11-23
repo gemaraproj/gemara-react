@@ -73,7 +73,74 @@ const others = [
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
     <title>gemara-react Astro example</title>
+    <style is:global>
+      :root {
+        --demo-bg: #ffffff;
+        --demo-panel: #f4f6f8;
+        --demo-border: #c8d0d8;
+        --demo-text: #17212b;
+        --demo-muted: #526170;
+        --demo-accent: #45208c;
+      }
+
+      [data-theme="dark"] {
+        --demo-bg: #17191f;
+        --demo-panel: #242832;
+        --demo-border: #46505d;
+        --demo-text: #f0f3f6;
+        --demo-muted: #b7c1cc;
+        --demo-accent: #b9a2ff;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: var(--demo-bg); }
+      body {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 1rem;
+        background: var(--demo-bg);
+        color: var(--demo-text);
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+
+      a { color: var(--demo-accent); }
+      hr { margin: 2rem 0; border: 0; border-top: 1px solid var(--demo-border); }
+      [data-gemara-artifact], [data-gemara-part] { color: var(--demo-text); }
+      [data-gemara-part="format-tabs"] {
+        overflow: hidden;
+        border: 1px solid var(--demo-border);
+        border-radius: 6px;
+        background: var(--demo-bg);
+      }
+      [data-gemara-part="format-tablist"] {
+        display: flex;
+        gap: .25rem;
+        padding: .5rem .75rem 0;
+        background: var(--demo-panel);
+        border-bottom: 1px solid var(--demo-border);
+      }
+      [data-gemara-part="format-tab"] {
+        padding: .5rem .75rem;
+        border: 0;
+        background: transparent;
+        color: var(--demo-muted);
+        cursor: pointer;
+      }
+      [data-gemara-part="format-tab"][aria-selected="true"] {
+        background: var(--demo-bg);
+        color: var(--demo-accent);
+        font-weight: 700;
+      }
+      [data-gemara-part="format-panel"] { padding: 1rem; }
+      [data-gemara-part="format-code"] {
+        overflow: auto;
+        padding: 1rem;
+        background: var(--demo-panel);
+        color: var(--demo-text);
+      }
+    </style>
   </head>
   <body>
     <main>
@@ -155,5 +222,33 @@ const others = [
         </section>
       ))}
     </main>
+    <script>
+      const allowedThemes = new Set(["dark", "light"]);
+
+      function sendReady() {
+        window.parent.postMessage({ type: "gemara-ready" }, "*");
+      }
+
+      function sendHeight() {
+        window.parent.postMessage(
+          { type: "gemara-resize", height: document.documentElement.scrollHeight },
+          "*",
+        );
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.data?.type === "gemara-theme" && allowedThemes.has(event.data.theme)) {
+          document.documentElement.dataset.theme = event.data.theme;
+          sendHeight();
+        }
+      });
+
+      window.addEventListener("load", () => {
+        sendReady();
+        sendHeight();
+      });
+
+      new ResizeObserver(sendHeight).observe(document.body);
+    </script>
   </body>
 </html>
